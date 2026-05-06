@@ -61,9 +61,13 @@ export class UtilsService {
     const chars: string[] = [pick(lower), pick(upper), pick(numeric), pick(special)];
     while (chars.length < length) { chars.push(pick(all)); }
 
-    // Fisher-Yates shuffle using crypto
+    // Fisher-Yates shuffle using crypto (rejection sampling to avoid modulo bias)
     for (let i = chars.length - 1; i > 0; i--) {
-      const j = crypto.getRandomValues(new Uint8Array(1))[0] % (i + 1);
+      const range = i + 1;
+      const limit = 256 - (256 % range);
+      let r: number;
+      do { r = crypto.getRandomValues(new Uint8Array(1))[0]; } while (r >= limit);
+      const j = r % range;
       [chars[i], chars[j]] = [chars[j], chars[i]];
     }
 
