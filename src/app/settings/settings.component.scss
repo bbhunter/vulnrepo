@@ -467,6 +467,19 @@ $danger-border:   rgba(183, 28, 28, 0.3);
   font-variant-numeric: tabular-nums;
 }
 
+.storage-approx {
+  font-size: 0.72rem;
+  color: $text-muted;
+  font-weight: 400;
+}
+
+.storage-note-small {
+  font-size: 0.73rem;
+  color: $text-muted;
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
 .storage-purge-result {
   display: flex;
   align-items: center;
