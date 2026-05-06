@@ -44,69 +44,6 @@
         </div>
       </div>
 
-      <!-- Storage & History -->
-      <div class="settings-section">
-        <div class="section-header">
-          <div class="section-header-icon-wrap">
-            <mat-icon class="section-icon">storage</mat-icon>
-          </div>
-          <div class="section-header-text">
-            <span class="section-title">Storage &amp; History</span>
-            <span class="section-subtitle">Browser storage usage and report history snapshots</span>
-          </div>
-        </div>
-        <div class="section-body">
-
-          @if (storageLoading) {
-            <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
-          }
-
-          @if (!storageLoading && storageQuotaBytes > 0) {
-            <div class="storage-stat-row">
-              <span class="storage-stat-label">Browser estimate <span class="storage-approx">(approx.)</span></span>
-              <span class="storage-stat-value">{{ formatBytes(storageUsedBytes) }} / {{ formatBytes(storageQuotaBytes) }}</span>
-            </div>
-            <mat-progress-bar
-              mode="determinate"
-              [value]="storagePercent"
-              [color]="storagePercent > 80 ? 'warn' : 'accent'"
-              class="storage-bar">
-            </mat-progress-bar>
-            <p class="storage-note-small">Reported by the browser for the whole origin. May lag several minutes after data deletion — click <mat-icon style="font-size:13px;vertical-align:middle;height:13px;width:13px;">refresh</mat-icon> to re-check.</p>
-          }
-
-          <div class="storage-stat-row" style="margin-top: 14px;">
-            <span class="storage-stat-label">History snapshots</span>
-            <span class="storage-stat-value">{{ historyCount }}</span>
-          </div>
-
-          <div class="section-note" style="margin-top: 12px;">
-            Keep only the N most recent snapshots per report. Older snapshots will be permanently deleted.
-          </div>
-
-          <div class="action-row" style="margin-top: 10px; align-items: center; gap: 10px;">
-            <mat-form-field appearance="outline" class="compact-field" style="width: 120px; margin-bottom: -1.25em;">
-              <mat-label>Keep N</mat-label>
-              <input matInput type="number" [(ngModel)]="historyKeepN" min="1" max="999">
-            </mat-form-field>
-            <button mat-flat-button color="warn" (click)="purgeOldHistory()" [disabled]="historyPurging">
-              <mat-icon>auto_delete</mat-icon> Purge old
-            </button>
-            <button mat-icon-button (click)="loadStorageStats()" title="Refresh" [disabled]="storageLoading">
-              <mat-icon>refresh</mat-icon>
-            </button>
-          </div>
-
-          @if (historyPurgedCount !== null) {
-            <p class="storage-purge-result">
-              <mat-icon style="font-size:16px;vertical-align:middle;">check_circle</mat-icon>
-              Deleted {{ historyPurgedCount }} snapshot(s).
-            </p>
-          }
-
-        </div>
-      </div>
-
       <!-- Remove all data -->
       <div class="settings-section settings-section--danger">
         <div class="section-header">
@@ -287,13 +224,151 @@
         </div>
 
       </div>
-          <p>&nbsp;</p>
-          <p>&nbsp;</p>
-          <p>&nbsp;</p>
+
+      <!-- API Vault -->
+      <div class="settings-section">
+        <div class="section-header">
+          <div class="section-header-icon-wrap section-header-icon-wrap--vault">
+            <mat-icon class="section-icon">lock</mat-icon>
+          </div>
+          <div class="section-header-text">
+            <span class="section-title">VULNRΞPO API Vault</span>
+            <span class="section-subtitle">Secure browser storage for external API credentials</span>
+          </div>
+        </div>
+        <div class="section-body">
+
+          @if (listkey) {
+            @if (vaultList.length > 0) {
+              <div class="data-table-wrap">
+                <table mat-table style="width:100%;" [dataSource]="vaultListdataSource">
+                  <ng-container matColumnDef="vault_name">
+                    <th mat-header-cell *matHeaderCellDef>Vault name</th>
+                    <td mat-cell *matCellDef="let element">{{element.vault_name}}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="vault_settings">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let element">
+                      <button mat-icon-button class="row-action-btn" [matMenuTriggerFor]="vaultsettings">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #vaultsettings="matMenu">
+                        @if (!element.api) {
+                          <a [routerLink]="[]" (click)="removeapikey()" class="active-link" mat-menu-item>
+                            <mat-icon>delete_forever</mat-icon> Remove
+                          </a>
+                        }
+                      </mat-menu>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="vaultListdisplayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: vaultListdisplayedColumns;"></tr>
+                </table>
+              </div>
+            }
+          }
+
+          <div class="action-row action-row--spaced">
+            <div>
+              @if (!apiconneted && !tryconnectdb) {
+                <button mat-flat-button color="accent" (click)="openDialogAPIADD()">
+                  <mat-icon>cloud_upload</mat-icon> Create Vault
+                </button>
+              }
+              @if (tryconnectdb) {
+                <button mat-flat-button color="accent" (click)="tryconnect()">
+                  <mat-icon>lock_open</mat-icon> Access Vault
+                </button>
+              }
+              @if (apiconneted) {
+                <button mat-stroked-button color="warn" (click)="apidisconnect()">Disconnect</button>
+              }
+            </div>
+            <div class="action-row-end">
+              @if (apiconneted || tryconnectdb) {
+                <button mat-stroked-button (click)="exportvault()">
+                  <mat-icon>file_download</mat-icon> Export Vault
+                </button>
+              }
+              @if (!apiconneted && !tryconnectdb) {
+                <button mat-stroked-button (click)="VaultFileInput.click()">
+                  <mat-icon>playlist_add</mat-icon> Import Vault
+                </button>
+              }
+              <input hidden type="file" accept=".vulnrepo-vault" #VaultFileInput (change)="importvault($event.target)" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
     <!-- ── RIGHT COLUMN ── -->
     <div class="settings-column">
+
+      <!-- Storage & History -->
+      <div class="settings-section">
+        <div class="section-header">
+          <div class="section-header-icon-wrap">
+            <mat-icon class="section-icon">storage</mat-icon>
+          </div>
+          <div class="section-header-text">
+            <span class="section-title">Storage &amp; History</span>
+            <span class="section-subtitle">Browser storage usage and report history snapshots</span>
+          </div>
+        </div>
+        <div class="section-body">
+
+          @if (storageLoading) {
+            <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+          }
+
+          @if (!storageLoading && storageQuotaBytes > 0) {
+            <div class="storage-stat-row">
+              <span class="storage-stat-label">Browser estimate <span class="storage-approx">(approx.)</span></span>
+              <span class="storage-stat-value">{{ formatBytes(storageUsedBytes) }} / {{ formatBytes(storageQuotaBytes) }}</span>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="storagePercent"
+              [color]="storagePercent > 80 ? 'warn' : 'accent'"
+              class="storage-bar">
+            </mat-progress-bar>
+            <p class="storage-note-small">Reported by the browser for the whole origin. May lag several minutes after data deletion — click <mat-icon style="font-size:13px;vertical-align:middle;height:13px;width:13px;">refresh</mat-icon> to re-check.</p>
+          }
+
+          <div class="storage-stat-row" style="margin-top: 14px;">
+            <span class="storage-stat-label">History snapshots</span>
+            <span class="storage-stat-value">{{ historyCount }}</span>
+          </div>
+
+          <div class="section-note" style="margin-top: 12px;">
+            Keep only the N most recent snapshots per report. Older snapshots will be permanently deleted.
+          </div>
+
+          <div class="action-row" style="margin-top: 10px; align-items: center; gap: 10px;">
+            <mat-form-field appearance="outline" class="compact-field" style="width: 120px; margin-bottom: -1.25em;">
+              <mat-label>Keep N</mat-label>
+              <input matInput type="number" [(ngModel)]="historyKeepN" min="1" max="999">
+            </mat-form-field>
+            <button mat-flat-button color="warn" (click)="purgeOldHistory()" [disabled]="historyPurging">
+              <mat-icon>auto_delete</mat-icon> Purge old
+            </button>
+            <button mat-icon-button (click)="loadStorageStats()" title="Refresh" [disabled]="storageLoading">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+
+          @if (historyPurgedCount !== null) {
+            <p class="storage-purge-result">
+              <mat-icon style="font-size:16px;vertical-align:middle;">check_circle</mat-icon>
+              Deleted {{ historyPurgedCount }} snapshot(s).
+            </p>
+          }
+
+        </div>
+      </div>
 
       <!-- Report Templates -->
       <div class="settings-section">
@@ -528,83 +603,7 @@
         </div>
       </div>
 
-      <!-- API Vault -->
-      <div class="settings-section">
-        <div class="section-header">
-          <div class="section-header-icon-wrap section-header-icon-wrap--vault">
-            <mat-icon class="section-icon">lock</mat-icon>
-          </div>
-          <div class="section-header-text">
-            <span class="section-title">VULNRΞPO API Vault</span>
-            <span class="section-subtitle">Secure browser storage for external API credentials</span>
-          </div>
-        </div>
-        <div class="section-body">
-
-          @if (listkey) {
-            @if (vaultList.length > 0) {
-              <div class="data-table-wrap">
-                <table mat-table style="width:100%;" [dataSource]="vaultListdataSource">
-                  <ng-container matColumnDef="vault_name">
-                    <th mat-header-cell *matHeaderCellDef>Vault name</th>
-                    <td mat-cell *matCellDef="let element">{{element.vault_name}}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="vault_settings">
-                    <th mat-header-cell *matHeaderCellDef></th>
-                    <td mat-cell *matCellDef="let element">
-                      <button mat-icon-button class="row-action-btn" [matMenuTriggerFor]="vaultsettings">
-                        <mat-icon>more_vert</mat-icon>
-                      </button>
-                      <mat-menu #vaultsettings="matMenu">
-                        @if (!element.api) {
-                          <a [routerLink]="[]" (click)="removeapikey()" class="active-link" mat-menu-item>
-                            <mat-icon>delete_forever</mat-icon> Remove
-                          </a>
-                        }
-                      </mat-menu>
-                    </td>
-                  </ng-container>
-                  <tr mat-header-row *matHeaderRowDef="vaultListdisplayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: vaultListdisplayedColumns;"></tr>
-                </table>
-              </div>
-            }
-          }
-
-          <div class="action-row action-row--spaced">
-            <div>
-              @if (!apiconneted && !tryconnectdb) {
-                <button mat-flat-button color="accent" (click)="openDialogAPIADD()">
-                  <mat-icon>cloud_upload</mat-icon> Create Vault
-                </button>
-              }
-              @if (tryconnectdb) {
-                <button mat-flat-button color="accent" (click)="tryconnect()">
-                  <mat-icon>lock_open</mat-icon> Access Vault
-                </button>
-              }
-              @if (apiconneted) {
-                <button mat-stroked-button color="warn" (click)="apidisconnect()">Disconnect</button>
-              }
-            </div>
-            <div class="action-row-end">
-              @if (apiconneted || tryconnectdb) {
-                <button mat-stroked-button (click)="exportvault()">
-                  <mat-icon>file_download</mat-icon> Export Vault
-                </button>
-              }
-              @if (!apiconneted && !tryconnectdb) {
-                <button mat-stroked-button (click)="VaultFileInput.click()">
-                  <mat-icon>playlist_add</mat-icon> Import Vault
-                </button>
-              }
-              <input hidden type="file" accept=".vulnrepo-vault" #VaultFileInput (change)="importvault($event.target)" />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
+      <p>&nbsp;</p>
       <!-- API List -->
       @if (!tryconnectdb && !showregapi) {
         <div class="settings-section">
