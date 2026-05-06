@@ -1645,6 +1645,65 @@ export class IndexeddbService {
   }
 
 
+  getAllHistoryEntriesWithKeys(): Promise<{ key: any; entry: any }[]> {
+    return new Promise((resolve, reject) => {
+      const idb = window.indexedDB;
+      const open = idb.open('vulnrepo-db-history', 1);
+      open.onupgradeneeded = () => {
+        open.result.createObjectStore('reports-history', { autoIncrement: true });
+      };
+      open.onsuccess = () => {
+        const db = open.result;
+        const tx = db.transaction('reports-history', 'readonly');
+        const store = tx.objectStore('reports-history');
+        const req = store.openCursor();
+        const arr: { key: any; entry: any }[] = [];
+        req.onsuccess = () => {
+          const cursor = req.result;
+          if (cursor) { arr.push({ key: cursor.primaryKey, entry: cursor.value }); cursor.continue(); }
+        };
+        tx.oncomplete = () => { db.close(); resolve(arr); };
+        req.onerror = (e) => reject(e);
+      };
+    });
+  }
+
+  deleteHistoryByKey(key: any): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const idb = window.indexedDB;
+      const open = idb.open('vulnrepo-db-history', 1);
+      open.onupgradeneeded = () => {
+        open.result.createObjectStore('reports-history', { autoIncrement: true });
+      };
+      open.onsuccess = () => {
+        const db = open.result;
+        const tx = db.transaction('reports-history', 'readwrite');
+        tx.objectStore('reports-history').delete(key);
+        tx.oncomplete = () => { db.close(); resolve(); };
+        tx.onerror = (e) => reject(e);
+      };
+    });
+  }
+
+  async purgeOldHistorySnapshots(keepN: number): Promise<number> {
+    const all = await this.getAllHistoryEntriesWithKeys();
+    const byReport: Record<string, { key: any; entry: any }[]> = {};
+    for (const item of all) {
+      const id = item.entry.report_id;
+      if (!byReport[id]) byReport[id] = [];
+      byReport[id].push(item);
+    }
+    let deleted = 0;
+    for (const items of Object.values(byReport)) {
+      items.sort((a, b) => (b.entry.report_lastupdate || 0) - (a.entry.report_lastupdate || 0));
+      for (const item of items.slice(keepN)) {
+        await this.deleteHistoryByKey(item.key);
+        deleted++;
+      }
+    }
+    return deleted;
+  }
+
   getkeybyAiintegration() {
     return new Promise<any>((resolve, reject) => {
 

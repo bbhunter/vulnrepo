@@ -42,25 +42,32 @@ export class UtilsService {
   }
 
 
-  generatePassword(length: number) {
-    const string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  generatePassword(length: number): string {
+    const lower   = 'abcdefghijklmnopqrstuvwxyz';
+    const upper   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numeric = '0123456789';
-    const punctuation = '!@#$%^&*()_+~`|}{[]\:;?><,./-=';
-    let password = '', character = '', ent1 = 0, ent2 = 0, ent3 = 0, hold = '', pass = '';
-    while (password.length < length) {
-      ent1 = Math.ceil(string.length * Math.random() * Math.random());
-      ent2 = Math.ceil(numeric.length * Math.random() * Math.random());
-      ent3 = Math.ceil(punctuation.length * Math.random() * Math.random());
-      hold = string.charAt(ent1);
-      hold = (password.length % 2 === 0) ? (hold.toUpperCase()) : (hold);
-      character += hold;
-      character += numeric.charAt(ent2);
-      character += punctuation.charAt(ent3);
-      password = character;
+    const special = '!@#$%^&*()_+~`|}{[]:;?><,./-=';
+    const all     = lower + upper + numeric + special;
+
+    // Rejection-sampling pick: avoids modulo bias
+    const pick = (charset: string): string => {
+      const limit = 256 - (256 % charset.length);
+      let b: number;
+      do { b = crypto.getRandomValues(new Uint8Array(1))[0]; } while (b >= limit);
+      return charset[b % charset.length];
+    };
+
+    // Guarantee at least one char from each category
+    const chars: string[] = [pick(lower), pick(upper), pick(numeric), pick(special)];
+    while (chars.length < length) { chars.push(pick(all)); }
+
+    // Fisher-Yates shuffle using crypto
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = crypto.getRandomValues(new Uint8Array(1))[0] % (i + 1);
+      [chars[i], chars[j]] = [chars[j], chars[i]];
     }
-    password = password.split('').sort(function () { return 0.5 - Math.random(); }).join('');
-    pass = password.substr(0, length);
-    return pass
+
+    return chars.slice(0, length).join('');
   }
 
 

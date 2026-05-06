@@ -44,6 +44,68 @@
         </div>
       </div>
 
+      <!-- Storage & History -->
+      <div class="settings-section">
+        <div class="section-header">
+          <div class="section-header-icon-wrap">
+            <mat-icon class="section-icon">storage</mat-icon>
+          </div>
+          <div class="section-header-text">
+            <span class="section-title">Storage &amp; History</span>
+            <span class="section-subtitle">Browser storage usage and report history snapshots</span>
+          </div>
+        </div>
+        <div class="section-body">
+
+          @if (storageLoading) {
+            <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+          }
+
+          @if (!storageLoading && storageQuotaBytes > 0) {
+            <div class="storage-stat-row">
+              <span class="storage-stat-label">Used</span>
+              <span class="storage-stat-value">{{ formatBytes(storageUsedBytes) }} / {{ formatBytes(storageQuotaBytes) }}</span>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="storagePercent"
+              [color]="storagePercent > 80 ? 'warn' : 'accent'"
+              class="storage-bar">
+            </mat-progress-bar>
+          }
+
+          <div class="storage-stat-row" style="margin-top: 14px;">
+            <span class="storage-stat-label">History snapshots</span>
+            <span class="storage-stat-value">{{ historyCount }}</span>
+          </div>
+
+          <div class="section-note" style="margin-top: 12px;">
+            Keep only the N most recent snapshots per report. Older snapshots will be permanently deleted.
+          </div>
+
+          <div class="action-row" style="margin-top: 10px; align-items: center; gap: 10px;">
+            <mat-form-field appearance="outline" class="compact-field" style="width: 120px; margin-bottom: -1.25em;">
+              <mat-label>Keep N</mat-label>
+              <input matInput type="number" [(ngModel)]="historyKeepN" min="1" max="999">
+            </mat-form-field>
+            <button mat-flat-button color="warn" (click)="purgeOldHistory()" [disabled]="historyPurging">
+              <mat-icon>auto_delete</mat-icon> Purge old
+            </button>
+            <button mat-icon-button (click)="loadStorageStats()" title="Refresh" [disabled]="storageLoading">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+
+          @if (historyPurgedCount !== null) {
+            <p class="storage-purge-result">
+              <mat-icon style="font-size:16px;vertical-align:middle;">check_circle</mat-icon>
+              Deleted {{ historyPurgedCount }} snapshot(s).
+            </p>
+          }
+
+        </div>
+      </div>
+
       <!-- Remove all data -->
       <div class="settings-section settings-section--danger">
         <div class="section-header">
@@ -222,8 +284,11 @@
           </div>
 
         </div>
-      </div>
 
+      </div>
+          <p>&nbsp;</p>
+          <p>&nbsp;</p>
+          <p>&nbsp;</p>
     </div>
 
     <!-- ── RIGHT COLUMN ── -->

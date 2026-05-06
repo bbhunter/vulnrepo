@@ -80,6 +80,28 @@ export class SettingsComponent implements OnInit {
   reportTemplateList:any = [];
   reportProfileList_int:any = [];
 
+  // ── Storage & History ───────────────────────────────────────────────────────
+  storageUsedBytes = 0;
+  storageQuotaBytes = 0;
+  storageLoading = false;
+  historyCount = 0;
+  historyKeepN = 10;
+  historyPurging = false;
+  historyPurgedCount: number | null = null;
+
+  get storagePercent(): number {
+    return this.storageQuotaBytes > 0
+      ? Math.min(100, (this.storageUsedBytes / this.storageQuotaBytes) * 100)
+      : 0;
+  }
+
+  formatBytes(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+  }
+
   // ── Import vectors ──────────────────────────────────────────────────────────
   vectorList: ImportVector[] = [];
   selectedVectorIds = new Set<string>();
@@ -108,6 +130,7 @@ export class SettingsComponent implements OnInit {
 
     this.getVault();
     this.loadVectors();
+    this.loadStorageStats();
 
     this.indexeddbService.getkeybyAiintegration().then(ret => {
       
@@ -1079,6 +1102,31 @@ export class SettingsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The AI-Settings dialog was closed');
     });
+  }
+
+  async loadStorageStats() {
+    this.storageLoading = true;
+    try {
+      if (navigator.storage?.estimate) {
+        const est = await navigator.storage.estimate();
+        this.storageUsedBytes = est.usage ?? 0;
+        this.storageQuotaBytes = est.quota ?? 0;
+      }
+      const entries = await this.indexeddbService.getAllHistoryEntriesWithKeys();
+      this.historyCount = entries.length;
+    } catch { /* silent */ }
+    finally { this.storageLoading = false; }
+  }
+
+  async purgeOldHistory() {
+    this.historyPurging = true;
+    this.historyPurgedCount = null;
+    try {
+      const n = Math.max(1, Math.floor(this.historyKeepN));
+      this.historyPurgedCount = await this.indexeddbService.purgeOldHistorySnapshots(n);
+      await this.loadStorageStats();
+    } catch { /* silent */ }
+    finally { this.historyPurging = false; }
   }
 
   // ── Import vectors ──────────────────────────────────────────────────────────

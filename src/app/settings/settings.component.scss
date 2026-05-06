@@ -444,6 +444,40 @@ $danger-border:   rgba(183, 28, 28, 0.3);
   padding: 4px 0;
 }
 
+// ─── Storage & History ────────────────────────────────────────────────────────
+
+.storage-bar {
+  border-radius: 4px;
+  height: 6px !important;
+  margin-top: 6px;
+}
+
+.storage-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.storage-stat-label { color: $text-muted; }
+
+.storage-stat-value {
+  color: $text;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.storage-purge-result {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: $accent;
+  margin: 10px 0 0;
+
+  mat-icon { color: $accent; }
+}
+
 // ─── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 599px) {
