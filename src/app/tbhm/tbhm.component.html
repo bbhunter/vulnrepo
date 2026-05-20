@@ -1,185 +1,214 @@
 <div class="tbhm-shell">
 
-  <!-- Sticky top: header + progress bar -->
-  <div class="tbhm-sticky-top">
-  <div class="tbhm-header">
-    <div class="tbhm-header-left">
-      <div class="tbhm-avatar">
-        <img width="22" src="assets/issue.png" alt="TBHM">
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-icon">
+        <img width="28px" src="assets/issue.png" alt="TBHM">
       </div>
-      <div class="tbhm-header-text">
-        <span class="tbhm-title">The Bug Hunter's Methodology</span>
-        <span class="tbhm-subtitle">Fast Testing Checklist ·
-          <a class="header-link" target="_blank" href="https://github.com/jhaddix/tbhm">jhaddix/tbhm</a>
-        </span>
+      <div class="page-title-group">
+        <h1 class="page-title">The Bug Hunter's Methodology</h1>
+        <span class="page-subtitle">Fast Testing Checklist — 74 items for web app pentesters</span>
       </div>
     </div>
-    <div class="tbhm-header-right">
-      <span class="progress-badge">{{selecteditems.length}}<span class="progress-sep">/</span>74</span>
-      <button mat-icon-button class="reset-btn" title="Reset all" (click)="resetselected()">
-        <mat-icon>autorenew</mat-icon>
+    <div class="page-header-right">
+      <button class="action-btn action-btn-danger" (click)="resetselected()" aria-label="Reset all selections and notes">
+        <mat-icon class="action-btn-icon">restart_alt</mat-icon>
+        Reset
       </button>
     </div>
   </div>
 
-  <!-- Progress bar -->
-  <div class="tbhm-progress-track">
-    <div class="tbhm-progress-fill" [style.width.%]="(selecteditems.length / 74) * 100"></div>
+  <!-- Description card -->
+  <div class="info-card">
+    <mat-icon class="info-card-icon">info_outline</mat-icon>
+    <span class="info-card-text">
+      A concise web application testing checklist by Jason Haddix. Track your progress through recon, access, input handling, application logic, hosting and miscellaneous checks.
+      <a class="link" target="_blank" rel="noopener" href="https://github.com/jhaddix/tbhm">jhaddix/tbhm more info</a>
+    </span>
   </div>
-  </div><!-- /.tbhm-sticky-top -->
 
-  <!-- Checklist body -->
-  <div class="tbhm-body" [formGroup]="allreq">
-
-    <!-- App Recon -->
-    <div class="section-card">
-      <div class="section-header">
-        <mat-icon class="section-icon">travel_explore</mat-icon>
-        <span class="section-title">App Recon & Analysis</span>
-        <span class="section-count">9 items</span>
-      </div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r1"></mat-checkbox><span>Map visible content (Manually)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r2"></mat-checkbox><span>Discover hidden &amp; default content (Directory/File Bruteforce)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r3"></mat-checkbox><span>Test for debug parameters</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r4"></mat-checkbox><span>Identify data entry points (Discover Dynamic Content in Burp Pro)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r5"></mat-checkbox><span>Identify the technologies used (Wappalyzer or similar)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r6"></mat-checkbox><span>Research existing vulnerabilities in technology (Google++)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r7"></mat-checkbox><span>Gather wordlists for specific technology (Assetnote ones are excellent)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r8"></mat-checkbox><span>Map the attack surface automatically (Spider)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r9"></mat-checkbox><span>Identify all JavaScript files for later analysis (in your proxy)</span></label>
-      </div>
+  <!-- Filters -->
+  <div class="section-card filters-card">
+    <div class="search-field">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text"
+        class="search-input"
+        placeholder="Search by ID or description…"
+        aria-label="Search checklist"
+        [ngModel]="searchQuery"
+        (ngModelChange)="onSearchChange($event)">
+      @if (searchQuery) {
+        <button class="search-clear" (click)="onSearchChange('')" aria-label="Clear search">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </div>
 
-    <!-- Access handling -->
-    <div class="section-card">
-      <div class="section-header">
-        <mat-icon class="section-icon">lock_open</mat-icon>
-        <span class="section-title">Test Handling of Access</span>
-        <span class="section-count">22 items</span>
-      </div>
-
-      <div class="subsection-label">Authentication</div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r10"></mat-checkbox><span>Test password quality rules</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r11"></mat-checkbox><span>Test for username enumeration</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r12"></mat-checkbox><span>Test resilience to password guessing</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r13"></mat-checkbox><span>Test any account recovery function</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r14"></mat-checkbox><span>Test any "remember me" function</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r15"></mat-checkbox><span>Test any impersonation function</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r16"></mat-checkbox><span>Test username uniqueness</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r17"></mat-checkbox><span>Check for unsafe distribution of credentials</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r18"></mat-checkbox><span>Test for fail-open conditions</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r19"></mat-checkbox><span>Test any multi-stage mechanisms</span></label>
-      </div>
-
-      <div class="subsection-label">Session Handling</div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r20"></mat-checkbox><span>Test tokens for meaning</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r21"></mat-checkbox><span>Test tokens for predictability</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r22"></mat-checkbox><span>Check for insecure transmission of tokens</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r23"></mat-checkbox><span>Check for disclosure of tokens in logs</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r24"></mat-checkbox><span>Check mapping of tokens to sessions</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r25"></mat-checkbox><span>Check session termination</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r26"></mat-checkbox><span>Check for session fixation</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r27"></mat-checkbox><span>Check for cross-site request forgery</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r28"></mat-checkbox><span>Check cookie scope</span></label>
-      </div>
-
-      <div class="subsection-label">Access Controls</div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r29"></mat-checkbox><span>Understand the access control requirements</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r30"></mat-checkbox><span>Test effectiveness of controls, using multiple accounts if possible</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r31"></mat-checkbox><span>Test for insecure access control methods (request parameters, Referer header, etc)</span></label>
+    <div class="filter-grid">
+      <div class="filter-group">
+        <span class="filter-label">Status</span>
+        <div class="level-chips">
+          <button class="level-chip" [class.level-chip-active]="checkedFilter === 'all'"
+            (click)="onCheckedFilterChange('all')">All</button>
+          <button class="level-chip" [class.level-chip-active]="checkedFilter === 'checked'"
+            (click)="onCheckedFilterChange('checked')">
+            <mat-icon class="chip-icon">check_circle</mat-icon> Checked
+          </button>
+          <button class="level-chip" [class.level-chip-active]="checkedFilter === 'unchecked'"
+            (click)="onCheckedFilterChange('unchecked')">
+            <mat-icon class="chip-icon">radio_button_unchecked</mat-icon> Unchecked
+          </button>
+        </div>
       </div>
     </div>
-
-    <!-- Input handling -->
-    <div class="section-card">
-      <div class="section-header">
-        <mat-icon class="section-icon">bug_report</mat-icon>
-        <span class="section-title">Test Handling of Input</span>
-        <span class="section-count">17 items</span>
-      </div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r32"></mat-checkbox><span>Fuzz all request parameters</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r33"></mat-checkbox><span>Test for SQL injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r34"></mat-checkbox><span>Identify all reflected data</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r35"></mat-checkbox><span>Test for reflected XSS</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r36"></mat-checkbox><span>Test for HTTP header injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r37"></mat-checkbox><span>Test for arbitrary redirection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r38"></mat-checkbox><span>Test for stored attacks</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r39"></mat-checkbox><span>Test for OS command injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r40"></mat-checkbox><span>Test for path traversal</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r41"></mat-checkbox><span>Test for script injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r42"></mat-checkbox><span>Test for file inclusion</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r43"></mat-checkbox><span>Test for SMTP injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r44"></mat-checkbox><span>Test for native software flaws (buffer overflow, integer bugs, format strings)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r45"></mat-checkbox><span>Test for SOAP injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r46"></mat-checkbox><span>Test for LDAP injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r47"></mat-checkbox><span>Test for XPath injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r48"></mat-checkbox><span>Test for SSRF and HTTP redirects in all redirecting parameters</span></label>
-      </div>
-    </div>
-
-    <!-- App logic -->
-    <div class="section-card">
-      <div class="section-header">
-        <mat-icon class="section-icon">account_tree</mat-icon>
-        <span class="section-title">Test Application Logic</span>
-        <span class="section-count">8 items</span>
-      </div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r49"></mat-checkbox><span>Identify the logic attack surface</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r50"></mat-checkbox><span>Test transmission of data via the client</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r51"></mat-checkbox><span>Test for reliance on client-side input validation</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r52"></mat-checkbox><span>Test any thick-client components (Java, ActiveX, Flash)</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r53"></mat-checkbox><span>Test multi-stage processes for logic flaws</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r54"></mat-checkbox><span>Test handling of incomplete input</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r55"></mat-checkbox><span>Test trust boundaries</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r56"></mat-checkbox><span>Test transaction logic</span></label>
-      </div>
-    </div>
-
-    <!-- Hosting -->
-    <div class="section-card">
-      <div class="section-header">
-        <mat-icon class="section-icon">dns</mat-icon>
-        <span class="section-title">Assess Application Hosting</span>
-        <span class="section-count">9 items</span>
-      </div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r57"></mat-checkbox><span>Test segregation in shared infrastructures</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r58"></mat-checkbox><span>Test segregation between ASP-hosted applications</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r59"></mat-checkbox><span>Test for web server vulnerabilities</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r60"></mat-checkbox><span>Default credentials</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r61"></mat-checkbox><span>Default content</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r62"></mat-checkbox><span>Dangerous HTTP methods</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r63"></mat-checkbox><span>Proxy functionality</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r64"></mat-checkbox><span>Virtual hosting mis-configuration</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r65"></mat-checkbox><span>Bugs in web server software</span></label>
-      </div>
-    </div>
-
-    <!-- Miscellaneous -->
-    <div class="section-card">
-      <div class="section-header">
-        <mat-icon class="section-icon">more_horiz</mat-icon>
-        <span class="section-title">Miscellaneous Tests</span>
-        <span class="section-count">9 items</span>
-      </div>
-      <div class="check-list">
-        <label class="check-row"><mat-checkbox formControlName="r66"></mat-checkbox><span>Check for DOM-based attacks</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r67"></mat-checkbox><span>Check for frame injection</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r68"></mat-checkbox><span>Check for local privacy vulnerabilities</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r69"></mat-checkbox><span>Persistent cookies</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r70"></mat-checkbox><span>Caching</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r71"></mat-checkbox><span>Sensitive data in URL parameters</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r72"></mat-checkbox><span>Forms with autocomplete enabled</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r73"></mat-checkbox><span>Follow up any information leakage</span></label>
-        <label class="check-row"><mat-checkbox formControlName="r74"></mat-checkbox><span>Check for weak SSL ciphers</span></label>
-      </div>
-    </div>
-
   </div>
+
+  <!-- Sticky progress bar -->
+  <div class="sticky-stats">
+    <div class="stats-row">
+      <div class="stats-left">
+        <span class="stats-label">Items</span>
+        <span class="stats-value">{{filteredTotal()}}</span>
+        <span class="stats-divider">·</span>
+        <span class="stats-label">Checked</span>
+        <span class="stats-value checked">{{selectedCount()}}/{{totalItems()}}</span>
+      </div>
+      <div class="stats-right">
+        <span class="stats-pct">{{percent() | number:'1.0-0'}}%</span>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="percent()"></div>
+    </div>
+  </div>
+
+  <!-- Checklist -->
+  <div class="requirements-section">
+    <h2 class="section-heading">Checklist</h2>
+
+    @if (filteredTotal() === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <span class="empty-text">No items match your filters.</span>
+      </div>
+    }
+
+    @for (sec of sections; track sec.id) {
+      @if (sectionHasFilteredItems(sec)) {
+        <div class="req-group">
+
+          <!-- Section heading -->
+          <div class="chapter-header" [id]="anchorId(sec.id)">
+            <mat-checkbox
+              class="chapter-checkbox"
+              [checked]="isAllSelectedSection(sec)"
+              [indeterminate]="isAnySelectedSection(sec) && !isAllSelectedSection(sec)"
+              (change)="toggleSection(sec)"
+              [attr.aria-label]="'Toggle all in ' + sec.title">
+            </mat-checkbox>
+            <mat-icon class="chapter-icon">{{sec.icon}}</mat-icon>
+            <span class="chapter-name">{{sec.title}}</span>
+            <a class="anchor-link" [href]="'/tbhm#' + anchorId(sec.id)"
+               [attr.aria-label]="'Link to ' + sec.title">
+              <mat-icon class="anchor-icon">link</mat-icon>
+            </a>
+            <div class="chapter-progress">
+              <span class="chapter-progress-count">
+                {{sectionChecked(sec)}}/{{sectionTotal(sec)}}
+              </span>
+              <div class="chapter-progress-track">
+                <div class="chapter-progress-fill" [style.width.%]="sectionPercent(sec)"></div>
+              </div>
+            </div>
+          </div>
+
+          @if (sec.subsections) {
+            @for (sub of sec.subsections; track sub.title) {
+              @if (filteredItems(sub.items).length > 0) {
+                <div class="sub-group">
+
+                  <div class="sub-header">
+                    <mat-checkbox
+                      class="sub-checkbox"
+                      [checked]="isAllSelectedSub(sub)"
+                      [indeterminate]="isAnySelectedSub(sub) && !isAllSelectedSub(sub)"
+                      (change)="toggleSub(sub)"
+                      [attr.aria-label]="'Toggle all in ' + sub.title">
+                    </mat-checkbox>
+                    <span class="sub-name">{{sub.title}}</span>
+                  </div>
+
+                  <div class="items-list">
+                    @for (item of filteredItems(sub.items); track item.id) {
+                      <ng-container *ngTemplateOutlet="itemTpl; context: {$implicit: item}"></ng-container>
+                    }
+                  </div>
+
+                </div>
+              }
+            }
+          } @else if (sec.items) {
+            <div class="items-list">
+              @for (item of filteredItems(sec.items); track item.id) {
+                <ng-container *ngTemplateOutlet="itemTpl; context: {$implicit: item}"></ng-container>
+              }
+            </div>
+          }
+
+        </div>
+      }
+    }
+  </div>
+
+  <ng-template #itemTpl let-item>
+    <div class="item-row"
+         tabindex="0"
+         role="button"
+         [attr.aria-pressed]="isChecked(item.id)"
+         (click)="toggleItem(item)"
+         (keydown.space)="handleItemKey($event, item, true)"
+         (keydown.enter)="handleItemKey($event, item, false)"
+         [class.row-selected]="isChecked(item.id)">
+      <mat-checkbox class="item-checkbox"
+                    (click)="$event.stopPropagation()"
+                    [checked]="isChecked(item.id)"
+                    (change)="toggleItem(item)"
+                    [attr.aria-label]="'Select ' + item.id">
+      </mat-checkbox>
+      <span class="shortcode-chip">{{item.id}}</span>
+      <div class="item-content">
+        <span class="item-text">{{item.text}}</span>
+
+        @if (isNoteOpen(item.id)) {
+          <textarea
+            class="note-input"
+            rows="2"
+            placeholder="Add a note for {{item.id}}…"
+            [ngModel]="notes[item.id] || ''"
+            (ngModelChange)="updateNote(item.id, $event)"
+            (click)="$event.stopPropagation()"></textarea>
+        } @else if (hasNote(item.id)) {
+          <div class="note-preview"
+               (click)="$event.stopPropagation(); toggleNote(item.id)">
+            <mat-icon class="note-preview-icon">sticky_note_2</mat-icon>
+            <span class="note-preview-text">{{notes[item.id]}}</span>
+          </div>
+        }
+
+        <button class="note-toggle"
+                [class.has-note]="hasNote(item.id)"
+                (click)="$event.stopPropagation(); toggleNote(item.id)"
+                [attr.aria-label]="(isNoteOpen(item.id) ? 'Close note for ' : 'Add note for ') + item.id">
+          <mat-icon class="note-toggle-icon">
+            {{ isNoteOpen(item.id) ? 'expand_less' : (hasNote(item.id) ? 'edit_note' : 'note_add') }}
+          </mat-icon>
+          <span class="note-toggle-text">
+            {{ isNoteOpen(item.id) ? 'Close' : (hasNote(item.id) ? 'Edit note' : 'Add note') }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
 </div>

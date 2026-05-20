@@ -6,7 +6,7 @@
         <mat-icon class="warning-icon">restart_alt</mat-icon>
       </div>
       <div class="reset-header-text">
-        <span class="reset-title">Reset ASVS checklist</span>
+        <span class="reset-title">{{title}}</span>
         <span class="reset-subtitle">This action cannot be undone</span>
       </div>
     </div>
@@ -16,9 +16,7 @@
   </div>
 
   <mat-dialog-content class="reset-body">
-    <p class="confirm-text">
-      All selected requirements <strong class="highlight">and notes</strong> will be removed from your local storage.
-    </p>
+    <p class="confirm-text" [innerHTML]="bodyHtml"></p>
   </mat-dialog-content>
 
   <div class="reset-actions">
