@@ -1,0 +1,32 @@
+<div class="reset-shell">
+
+  <div class="reset-header">
+    <div class="reset-header-left">
+      <div class="warning-icon-wrap">
+        <mat-icon class="warning-icon">restart_alt</mat-icon>
+      </div>
+      <div class="reset-header-text">
+        <span class="reset-title">Reset ASVS checklist</span>
+        <span class="reset-subtitle">This action cannot be undone</span>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="tool-btn close-btn" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="reset-body">
+    <p class="confirm-text">
+      All selected requirements <strong class="highlight">and notes</strong> will be removed from your local storage.
+    </p>
+  </mat-dialog-content>
+
+  <div class="reset-actions">
+    <button class="btn-cancel" (click)="cancel()">Cancel</button>
+    <button class="btn-confirm" (click)="confirm()">
+      <mat-icon class="btn-icon">restart_alt</mat-icon>
+      Reset
+    </button>
+  </div>
+
+</div>
