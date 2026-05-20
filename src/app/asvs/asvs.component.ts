@@ -8,10 +8,7 @@ import { DialogAsvs4Component } from '../dialog-asvs4/dialog-asvs4.component';
 export interface PeriodicElement {
   Shortcode: string;
   Description: string;
-  L1: any;
-  L2: any;
-  L3: any;
-  CWE: any;
+  L: string;
 }
 
 @Component({
@@ -22,7 +19,7 @@ export interface PeriodicElement {
 })
 export class AsvsComponent implements OnInit {
 
-displayedColumns: string[] = ['select', 'Shortcode', 'Description', 'L1', 'L2', 'L3', 'CWE'];
+displayedColumns: string[] = ['select', 'Shortcode', 'Description', 'L1', 'L2', 'L3'];
 dataSource = new MatTableDataSource<PeriodicElement>();
 selection = new SelectionModel<PeriodicElement>(true, []);
 asvs:any;
@@ -77,7 +74,7 @@ onChangeSelect(){
     }
   } else if (this.selectlevel === 'L1') {
     out = this.dataSource.data.filter((item) => {
-      if (item.L1.Required === true) {
+      if (item.L === '1') {
         return item;
       }
     });
@@ -86,7 +83,7 @@ onChangeSelect(){
     }
   } else if (this.selectlevel === 'L2') {
     out = this.dataSource.data.filter((item) => {
-      if (item.L2.Required === true) {
+      if (item.L === '1' || item.L === '2') {
         return item;
       }
     });
@@ -95,14 +92,14 @@ onChangeSelect(){
     }
   } else if (this.selectlevel === 'L3') {
     out = this.dataSource.data.filter((item) => {
-      if (item.L3.Required === true) {
+      if (item.L === '1' || item.L === '2' || item.L === '3') {
         return item;
       }
     });
     if (out.length > 0) {
       this.dataSource.data = out;
     }
-  } 
+  }
 
   if (out.length === 0) {
     this.dataSource.data = this.asvsdata;
@@ -118,19 +115,19 @@ parsefunct(arr){
 
   if (this.selectlevel === 'L1') {
     out = arr.filter((item) => {
-      if (item.L1.Required === true) {
+      if (item.L === '1') {
         return item;
       }
     });
   } else if (this.selectlevel === 'L2') {
     out = arr.filter((item) => {
-      if (item.L2.Required === true) {
+      if (item.L === '1' || item.L === '2') {
         return item;
       }
     });
   } else if (this.selectlevel === 'L3') {
     out = arr.filter((item) => {
-      if (item.L3.Required === true) {
+      if (item.L === '1' || item.L === '2' || item.L === '3') {
         return item;
       }
     });
@@ -231,7 +228,7 @@ resetselected() {
   ngOnInit() {
     this.selectlevel = 'All';
     this.dataSource.connect().subscribe(d => this.renderedData = d);
-    this.http.get<any>('/assets/OWASP Application Security Verification Standard 4.0.3-en.json?v=' + + new Date()).subscribe(res => {
+    this.http.get<any>('/assets/OWASP_Application_Security_Verification_Standard_5.0.0_en.json?v=' + + new Date()).subscribe(res => {
       this.asvs = res;
 
       for (let item of this.asvs.Requirements) {

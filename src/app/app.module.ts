@@ -45,7 +45,6 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { MatSelectModule } from '@angular/material/select';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { DatePipe } from '@angular/common';
-import { DialogImportComponent } from './dialog-import/dialog-import.component';
 import { DialogEditComponent } from './dialog-edit/dialog-edit.component';
 import { ImportReportComponent } from './import-report/import-report.component';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -106,7 +105,6 @@ import { MatStepperModule } from '@angular/material/stepper';
         ReportComponent,
         DialogPassComponent,
         DialogAddissueComponent,
-        DialogImportComponent,
         DialogEditComponent,
         ImportReportComponent,
         DialogExportissuesComponent,
