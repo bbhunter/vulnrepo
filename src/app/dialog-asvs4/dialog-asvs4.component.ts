@@ -69,7 +69,7 @@ export class DialogAsvs4Component implements OnInit {
           files: [],
           desc: res.Description,
           severity: 'Info',
-          ref: 'https://owasp.org/www-pdf-archive/OWASP_Application_Security_Verification_Standard_4.0-en.pdf\nhttps://cwe.mitre.org/data/definitions/'+res.CWE[0]+'.html',
+          ref: 'https://github.com/OWASP/ASVS/raw/v5.0.0/5.0/OWASP_Application_Security_Verification_Standard_5.0.0_en.pdf',
           cvss: '',
           cvss_vector: '',
           cve: '',
@@ -87,7 +87,7 @@ export class DialogAsvs4Component implements OnInit {
 
         const element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(ciphertext));
-        element.setAttribute('download', 'Vulnrepo asvs4 export.vuln');
+        element.setAttribute('download', 'Vulnrepo asvs export.vuln');
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();

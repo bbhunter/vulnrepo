@@ -8,7 +8,6 @@ import { Router } from '@angular/router';
 import { Subscription, of, concatMap, Observable } from 'rxjs';
 import { MessageService } from '../message.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { DialogImportComponent } from '../dialog-import/dialog-import.component';
 import { DialogImportAdvancedComponent } from '../dialog-import-advanced/dialog-import-advanced.component';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -1689,22 +1688,6 @@ Sample code here\n\
 
     advRef.afterClosed().subscribe(result => {
       if (result === undefined) return;
-
-      // User selected a standard source tile → open the classic dialog pre-set to that source
-      if (result?.delegateTo) {
-        const stdRef = this.dialog.open(DialogImportComponent, {
-          width: '500px',
-          data: { selected_source: result.delegateTo }
-        });
-        stdRef.afterClosed().subscribe(stdResult => {
-          if (stdResult !== undefined) {
-            this.applyImportResult(stdResult);
-          }
-        });
-        return;
-      }
-
-      // Wizard produced records directly
       this.applyImportResult(result);
     });
   }

@@ -4,20 +4,20 @@
   <div class="page-header">
     <div class="page-header-left">
       <div class="page-icon">
-        <img width="28px" src="assets/issue.png">
+        <img width="28px" src="assets/issue.png" alt="ASVS">
       </div>
       <div class="page-title-group">
         <h1 class="page-title">Application Security Verification Standard</h1>
-        <span class="page-subtitle">OWASP ASVS 4.0.3 — Security checklist for researchers</span>
+        <span class="page-subtitle">OWASP ASVS 5.0 — Security checklist for researchers</span>
       </div>
     </div>
     <div class="page-header-right">
-      <button class="action-btn" (click)="openasvs4dialog()">
-        <mat-icon class="action-btn-icon">arrow_downward</mat-icon>
+      <button class="action-btn" (click)="openasvs4dialog()" aria-label="Export selected requirements">
+        <mat-icon class="action-btn-icon">file_download</mat-icon>
         Export
       </button>
-      <button class="action-btn action-btn-danger" (click)="resetselected()">
-        <mat-icon class="action-btn-icon">autorenew</mat-icon>
+      <button class="action-btn action-btn-danger" (click)="resetselected()" aria-label="Reset all selections and notes">
+        <mat-icon class="action-btn-icon">restart_alt</mat-icon>
         Reset
       </button>
     </div>
@@ -29,30 +29,65 @@
       <mat-icon class="info-card-icon">info_outline</mat-icon>
       <span class="info-card-text">
         {{asvs.Description}}
-        <a class="link" target="_blank" href="https://owasp.org/www-project-application-security-verification-standard/">ASVS more info</a>
+        <a class="link" target="_blank" rel="noopener" href="https://owasp.org/www-project-application-security-verification-standard/">ASVS more info</a>
       </span>
     </div>
   }
 
-  <!-- Level selector -->
+  <!-- Filters -->
   @if (asvs) {
-    <div class="section-card">
-      <div class="level-selector-label">Filter by level</div>
-      <div class="level-chips">
-        <button class="level-chip" [class.level-chip-active]="selectlevel === 'All'"
-          (click)="selectlevel='All'; onChangeSelect()">All levels</button>
-        <button class="level-chip" [class.level-chip-active]="selectlevel === 'L1'"
-          (click)="selectlevel='L1'; onChangeSelect()">
-          <span class="level-badge l1">L1</span> First steps
-        </button>
-        <button class="level-chip" [class.level-chip-active]="selectlevel === 'L2'"
-          (click)="selectlevel='L2'; onChangeSelect()">
-          <span class="level-badge l2">L2</span> Most applications
-        </button>
-        <button class="level-chip" [class.level-chip-active]="selectlevel === 'L3'"
-          (click)="selectlevel='L3'; onChangeSelect()">
-          <span class="level-badge l3">L3</span> High assurance
-        </button>
+    <div class="section-card filters-card">
+      <div class="search-field">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text"
+          class="search-input"
+          placeholder="Search by shortcode or description…"
+          aria-label="Search requirements"
+          [ngModel]="searchQuery"
+          (ngModelChange)="onSearchChange($event)">
+        @if (searchQuery) {
+          <button class="search-clear" (click)="onSearchChange('')" aria-label="Clear search">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <div class="filter-grid">
+        <div class="filter-group">
+          <span class="filter-label">Level</span>
+          <div class="level-chips">
+            <button class="level-chip" [class.level-chip-active]="selectlevel === 'All'"
+              (click)="onLevelChange('All')">All</button>
+            <button class="level-chip" [class.level-chip-active]="selectlevel === 'L1'"
+              (click)="onLevelChange('L1')">
+              <span class="level-badge l1">L1</span> First steps
+            </button>
+            <button class="level-chip" [class.level-chip-active]="selectlevel === 'L2'"
+              (click)="onLevelChange('L2')">
+              <span class="level-badge l2">L2</span> Most apps
+            </button>
+            <button class="level-chip" [class.level-chip-active]="selectlevel === 'L3'"
+              (click)="onLevelChange('L3')">
+              <span class="level-badge l3">L3</span> High assurance
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Status</span>
+          <div class="level-chips">
+            <button class="level-chip" [class.level-chip-active]="checkedFilter === 'all'"
+              (click)="onCheckedFilterChange('all')">All</button>
+            <button class="level-chip" [class.level-chip-active]="checkedFilter === 'checked'"
+              (click)="onCheckedFilterChange('checked')">
+              <mat-icon class="chip-icon">check_circle</mat-icon> Checked
+            </button>
+            <button class="level-chip" [class.level-chip-active]="checkedFilter === 'unchecked'"
+              (click)="onCheckedFilterChange('unchecked')">
+              <mat-icon class="chip-icon">radio_button_unchecked</mat-icon> Unchecked
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   }
@@ -65,17 +100,17 @@
         <span class="stats-badge">{{selectlevel}}</span>
         <span class="stats-divider">·</span>
         <span class="stats-label">Items</span>
-        <span class="stats-value">{{parsefunct(asvsdata).length}}</span>
+        <span class="stats-value">{{totalCount()}}</span>
         <span class="stats-divider">·</span>
         <span class="stats-label">Checked</span>
-        <span class="stats-value checked">{{selection.selected.length}}</span>
+        <span class="stats-value checked">{{checkedCount()}}</span>
       </div>
       <div class="stats-right">
-        <span class="stats-pct">{{((selection.selected.length / parsefunct(asvsdata).length) * 100) | number:'1.0-0'}}%</span>
+        <span class="stats-pct">{{percent() | number:'1.0-0'}}%</span>
       </div>
     </div>
     <div class="progress-track">
-      <div class="progress-fill" [style.width.%]="(selection.selected.length / parsefunct(asvsdata).length) * 100"></div>
+      <div class="progress-fill" [style.width.%]="percent()"></div>
     </div>
   </div>
 
@@ -84,108 +119,158 @@
     <div class="requirements-section">
       <h2 class="section-heading">Requirements</h2>
 
-      @for (asvitem of asvs.Requirements; track asvitem) {
-        <div class="req-group">
+      @if (totalCount() === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">search_off</mat-icon>
+          <span class="empty-text">No requirements match your filters.</span>
+        </div>
+      }
 
-          <!-- Chapter heading -->
-          <div class="chapter-header" id="{{asvitem.Shortcode}} {{asvitem.ShortName}}">
-            <span class="chapter-code">{{asvitem.Shortcode}}</span>
-            <span class="chapter-name">{{asvitem.ShortName}}</span>
-            <a class="anchor-link" href="/asvs4#{{asvitem.Shortcode}} {{asvitem.ShortName}}">
-              <mat-icon class="anchor-icon">link</mat-icon>
-            </a>
-          </div>
+      @for (asvitem of asvs.Requirements; track asvitem.Shortcode) {
+        @if (itemsForChapter(asvitem.Shortcode).length > 0) {
+          <div class="req-group">
 
-          @for (asvsubitem of asvitem.Items; track asvsubitem) {
-            <div class="sub-group">
-
-              <!-- Sub-chapter heading -->
-              <div class="sub-header" id="{{asvsubitem.Shortcode}} {{asvsubitem.Name}}">
-                <span class="sub-code">{{asvsubitem.Shortcode}}</span>
-                <span class="sub-name">{{asvsubitem.Name}}</span>
-                <a class="anchor-link" href="/asvs4#{{asvsubitem.Shortcode}} {{asvsubitem.Name}}">
-                  <mat-icon class="anchor-icon">link</mat-icon>
-                </a>
+            <!-- Chapter heading -->
+            <div class="chapter-header" [id]="anchorId(asvitem.Shortcode, asvitem.ShortName)">
+              <mat-checkbox
+                class="chapter-checkbox"
+                [checked]="isAllSelectedChapter(asvitem.Shortcode)"
+                [indeterminate]="isAnySelectedChapter(asvitem.Shortcode) && !isAllSelectedChapter(asvitem.Shortcode)"
+                (change)="toggleChapter(asvitem.Shortcode)"
+                [attr.aria-label]="'Toggle all in ' + asvitem.ShortName">
+              </mat-checkbox>
+              <span class="chapter-code">{{asvitem.Shortcode}}</span>
+              <span class="chapter-name">{{asvitem.ShortName}}</span>
+              <a class="anchor-link" [href]="'/asvs#' + anchorId(asvitem.Shortcode, asvitem.ShortName)"
+                 [attr.aria-label]="'Link to ' + asvitem.ShortName">
+                <mat-icon class="anchor-icon">link</mat-icon>
+              </a>
+              <div class="chapter-progress">
+                <span class="chapter-progress-count">
+                  {{chapterCheckedCount(asvitem.Shortcode)}}/{{chapterTotalCount(asvitem.Shortcode)}}
+                </span>
+                <div class="chapter-progress-track">
+                  <div class="chapter-progress-fill" [style.width.%]="chapterPercent(asvitem.Shortcode)"></div>
+                </div>
               </div>
+            </div>
 
-              @if (parsefunct(asvsubitem.Items).length > 0) {
-                <div class="table-wrapper">
-                  <table mat-table [dataSource]="parsefunct(asvsubitem.Items)" class="asvs-table">
+            @for (asvsubitem of asvitem.Items; track asvsubitem.Shortcode) {
+              @if (itemsForSub(asvsubitem.Shortcode).length > 0) {
+                <div class="sub-group">
 
-                    <ng-container matColumnDef="select">
-                      <th mat-header-cell *matHeaderCellDef>
-                        <mat-checkbox
-                          (change)="$event ? toggleSpecificGroup(asvsubitem.Shortcode) : null"
-                          [checked]="checkedfn(asvsubitem.Shortcode) && isAllSelectedGv(asvsubitem.Shortcode)"
-                          [indeterminate]="checkedfn(asvsubitem.Shortcode) && !isAllSelectedGv(asvsubitem.Shortcode)">
-                        </mat-checkbox>
-                      </th>
-                      <td mat-cell *matCellDef="let row">
-                        <mat-checkbox (click)="$event.stopPropagation()"
-                          (change)="$event ? selection.toggle(row) : null"
-                          [checked]="selection.isSelected(row)">
-                        </mat-checkbox>
-                      </td>
-                    </ng-container>
+                  <!-- Sub-chapter heading -->
+                  <div class="sub-header" [id]="anchorId(asvsubitem.Shortcode, asvsubitem.Name)">
+                    <span class="sub-code">{{asvsubitem.Shortcode}}</span>
+                    <span class="sub-name">{{asvsubitem.Name}}</span>
+                    <a class="anchor-link" [href]="'/asvs#' + anchorId(asvsubitem.Shortcode, asvsubitem.Name)"
+                       [attr.aria-label]="'Link to ' + asvsubitem.Name">
+                      <mat-icon class="anchor-icon">link</mat-icon>
+                    </a>
+                  </div>
 
-                    <ng-container matColumnDef="Shortcode">
-                      <th mat-header-cell *matHeaderCellDef>#</th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="shortcode-chip">{{element.Shortcode}}</span>
-                      </td>
-                    </ng-container>
+                  <div class="table-wrapper">
+                    <table mat-table [dataSource]="itemsForSub(asvsubitem.Shortcode)" class="asvs-table">
 
-                    <ng-container matColumnDef="Description">
-                      <th mat-header-cell *matHeaderCellDef>Description</th>
-                      <td mat-cell *matCellDef="let element" class="desc-cell">{{element.Description}}</td>
-                    </ng-container>
+                      <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef>
+                          <mat-checkbox
+                            (change)="toggleSub(asvsubitem.Shortcode)"
+                            [checked]="isAllSelectedSub(asvsubitem.Shortcode)"
+                            [indeterminate]="isAnySelectedSub(asvsubitem.Shortcode) && !isAllSelectedSub(asvsubitem.Shortcode)"
+                            [attr.aria-label]="'Toggle all in ' + asvsubitem.Name">
+                          </mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let row">
+                          <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="selection.toggle(row)"
+                            [checked]="selection.isSelected(row)"
+                            [attr.aria-label]="'Select ' + row.Shortcode">
+                          </mat-checkbox>
+                        </td>
+                      </ng-container>
 
-                    <ng-container matColumnDef="L1">
-                      <th mat-header-cell *matHeaderCellDef><span class="level-badge l1">L1</span></th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="req-dot" [class.req-dot-on]="element.L1.Requirement === '✓'">{{element.L1.Requirement}}</span>
-                      </td>
-                    </ng-container>
+                      <ng-container matColumnDef="Shortcode">
+                        <th mat-header-cell *matHeaderCellDef>#</th>
+                        <td mat-cell *matCellDef="let element">
+                          <div class="shortcode-cell">
+                            <span class="shortcode-chip">{{element.Shortcode}}</span>
+                            <a class="ext-link"
+                               [href]="owaspUrl(element.Shortcode)"
+                               target="_blank"
+                               rel="noopener"
+                               (click)="$event.stopPropagation()"
+                               [attr.aria-label]="'Open ' + element.Shortcode + ' on OWASP GitHub'">
+                              <mat-icon class="ext-icon">open_in_new</mat-icon>
+                            </a>
+                          </div>
+                        </td>
+                      </ng-container>
 
-                    <ng-container matColumnDef="L2">
-                      <th mat-header-cell *matHeaderCellDef><span class="level-badge l2">L2</span></th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="req-dot" [class.req-dot-on]="element.L2.Requirement === '✓'">{{element.L2.Requirement}}</span>
-                      </td>
-                    </ng-container>
+                      <ng-container matColumnDef="Description">
+                        <th mat-header-cell *matHeaderCellDef>Description</th>
+                        <td mat-cell *matCellDef="let element" class="desc-cell">
+                          <div class="desc-text">{{element.Description}}</div>
 
-                    <ng-container matColumnDef="L3">
-                      <th mat-header-cell *matHeaderCellDef><span class="level-badge l3">L3</span></th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="req-dot" [class.req-dot-on]="element.L3.Requirement === '✓'">{{element.L3.Requirement}}</span>
-                      </td>
-                    </ng-container>
+                          @if (isNoteOpen(element.Shortcode)) {
+                            <textarea
+                              class="note-input"
+                              rows="2"
+                              placeholder="Add a note for {{element.Shortcode}}…"
+                              [ngModel]="notes[element.Shortcode] || ''"
+                              (ngModelChange)="updateNote(element.Shortcode, $event)"
+                              (click)="$event.stopPropagation()"></textarea>
+                          } @else if (hasNote(element.Shortcode)) {
+                            <div class="note-preview"
+                                 (click)="$event.stopPropagation(); toggleNote(element.Shortcode)">
+                              <mat-icon class="note-preview-icon">sticky_note_2</mat-icon>
+                              <span class="note-preview-text">{{notes[element.Shortcode]}}</span>
+                            </div>
+                          }
 
-                    <ng-container matColumnDef="CWE">
-                      <th mat-header-cell *matHeaderCellDef>CWE</th>
-                      <td mat-cell *matCellDef="let element">
-                        <a class="link cwe-link" target="_blank"
-                          href="https://cwe.mitre.org/data/definitions/{{element.CWE}}.html">
-                          {{element.CWE}}
-                        </a>
-                      </td>
-                    </ng-container>
+                          <button class="note-toggle"
+                                  [class.has-note]="hasNote(element.Shortcode)"
+                                  (click)="$event.stopPropagation(); toggleNote(element.Shortcode)"
+                                  [attr.aria-label]="(isNoteOpen(element.Shortcode) ? 'Close note for ' : 'Add note for ') + element.Shortcode">
+                            <mat-icon class="note-toggle-icon">
+                              {{ isNoteOpen(element.Shortcode) ? 'expand_less' : (hasNote(element.Shortcode) ? 'edit_note' : 'note_add') }}
+                            </mat-icon>
+                            <span class="note-toggle-text">
+                              {{ isNoteOpen(element.Shortcode) ? 'Close' : (hasNote(element.Shortcode) ? 'Edit note' : 'Add note') }}
+                            </span>
+                          </button>
+                        </td>
+                      </ng-container>
 
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                      (click)="selection.toggle(row)"
-                      [class.row-selected]="selection.isSelected(row)">
-                    </tr>
-                  </table>
+                      <ng-container matColumnDef="Level">
+                        <th mat-header-cell *matHeaderCellDef>Level</th>
+                        <td mat-cell *matCellDef="let element">
+                          <span class="level-badge"
+                                [class.l1]="element.L === '1'"
+                                [class.l2]="element.L === '2'"
+                                [class.l3]="element.L === '3'">L{{element.L}}</span>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                        tabindex="0"
+                        role="button"
+                        [attr.aria-pressed]="selection.isSelected(row)"
+                        (click)="selection.toggle(row)"
+                        (keydown.space)="handleRowKey($event, row, true)"
+                        (keydown.enter)="handleRowKey($event, row, false)"
+                        [class.row-selected]="selection.isSelected(row)">
+                      </tr>
+                    </table>
+                  </div>
+
                 </div>
               }
-
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
       }
     </div>
   }
-
-  <div style="height: 80px;"></div>
 </div>

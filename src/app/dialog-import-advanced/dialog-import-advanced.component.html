@@ -3,17 +3,35 @@
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <div class="adia-header">
     <div class="adia-header-left">
-      @if (mode === 'wizard') {
+      @if (mode !== 'tiles') {
         <button mat-icon-button class="hdr-btn back-btn" (click)="backToTiles()" title="Back to sources">
           <mat-icon>arrow_back</mat-icon>
         </button>
       }
       <div class="adia-avatar">
-        <mat-icon class="avatar-icon">{{ mode === 'wizard' ? 'auto_fix_high' : 'import_export' }}</mat-icon>
+        <mat-icon class="avatar-icon">
+          @switch (mode) {
+            @case ('wizard') { auto_fix_high }
+            @case ('source') { file_upload }
+            @default { import_export }
+          }
+        </mat-icon>
       </div>
       <div class="adia-header-text">
-        <span class="adia-title">{{ mode === 'wizard' ? 'Custom Import Wizard' : 'Advanced Import' }}</span>
-        <span class="adia-subtitle">{{ mode === 'wizard' ? 'Map any JSON, XML or CSV to issue fields' : 'Select a source or build a custom mapping' }}</span>
+        @switch (mode) {
+          @case ('wizard') {
+            <span class="adia-title">Custom Import Wizard</span>
+            <span class="adia-subtitle">Map any JSON, XML or CSV to issue fields</span>
+          }
+          @case ('source') {
+            <span class="adia-title">{{ sourceMeta?.viewValue }}</span>
+            <span class="adia-subtitle">Load findings from {{ sourceMeta?.format }} file</span>
+          }
+          @default {
+            <span class="adia-title">Advanced Import</span>
+            <span class="adia-subtitle">Select a source or build a custom mapping</span>
+          }
+        }
       </div>
     </div>
     <div class="adia-header-right">
@@ -130,6 +148,279 @@
     </div>
   }
 
+  <!-- ── SOURCE UPLOAD MODE ────────────────────────────────────────────── -->
+  @if (mode === 'source') {
+    <div class="adia-body source-body">
+
+      <div class="source-header-card">
+        <img [src]="sourceMeta?.viewImg" [alt]="sourceMeta?.viewValue" class="source-header-img">
+        <div class="source-header-text">
+          <span class="source-header-name">{{ sourceMeta?.viewValue }}</span>
+          <span class="source-header-fmt">{{ sourceMeta?.format }}</span>
+        </div>
+      </div>
+
+      <!-- VulnRepo Encrypted -->
+      @if (selectedSource === 'vulnrepojson') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">lock</mat-icon>
+            <span class="upload-label">{{ vulnFile ? vulnFile.name : 'Select encrypted .vuln file' }}</span>
+            @if (vulnFile) {
+              <span class="upload-size">{{ (vulnFile.size / 1024).toFixed(1) }} KB</span>
+            }
+            <input type="file" accept=".vuln" (change)="vulnFileChanged($event)" class="file-input">
+          </div>
+          <mat-form-field class="full-width" color="accent" appearance="outline">
+            <mat-label>Security key</mat-label>
+            <input cdkFocusInitial matInput placeholder="File security key" #vulnPass [type]="hidePassword ? 'password' : 'text'">
+            <mat-icon matSuffix (click)="hidePassword = !hidePassword" style="cursor:pointer">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </mat-form-field>
+          @if (sourceBusy) {
+            <div class="progress-row">
+              <span class="progress-label">Importing…</span>
+              <mat-progress-bar color="accent" mode="indeterminate" class="progress-bar"></mat-progress-bar>
+            </div>
+          }
+          @if (vulnWrongPass) {
+            <div class="error-banner">
+              <mat-icon class="error-icon">error_outline</mat-icon>
+              Wrong security key
+            </div>
+          }
+          <div class="step-actions">
+            <button class="ghost-btn" (click)="backToTiles()">Back</button>
+            <button class="primary-btn" [disabled]="!vulnFile || sourceBusy" (click)="startVulnUpload(vulnPass.value)">
+              <mat-icon>file_upload</mat-icon> Import
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Decrypted JSON -->
+      @if (selectedSource === 'decrypted_json') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="decryptedJsonOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Burp Suite -->
+      @if (selectedSource === 'burp') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .xml file</span>
+            <input cdkFocusInitial type="file" accept=".xml" (change)="burpOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Bugcrowd -->
+      @if (selectedSource === 'bugcrowd') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .csv file</span>
+            <input cdkFocusInitial type="file" accept=".csv" (change)="bugcrowdOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Nmap -->
+      @if (selectedSource === 'nmap') {
+        <div class="source-panel">
+          <div class="tool-info">
+            <span class="tool-info-text">Open source network discovery: <a class="tool-link" target="_blank" href="https://nmap.org/">Nmap</a></span>
+            <div class="code-block">
+              <code>$ <span class="code-accent">nmap -T4 -Pn -oX r.xml 1.1.1.1</span></code>
+            </div>
+            <mat-checkbox [(ngModel)]="removeStateDownIps" class="check-option">Remove state down IPs</mat-checkbox>
+          </div>
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .xml file</span>
+            <input cdkFocusInitial type="file" accept=".xml" (change)="nmapOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- OpenVAS -->
+      @if (selectedSource === 'openvas') {
+        <div class="source-panel">
+          <div class="info-hint">
+            <mat-icon class="hint-icon">info_outline</mat-icon>
+            Import <code>results-*.xml</code> file.
+          </div>
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .xml file</span>
+            <input cdkFocusInitial type="file" accept=".xml" (change)="openvasOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Nessus XML -->
+      @if (selectedSource === 'nessus_xml') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .nessus file</span>
+            <input cdkFocusInitial type="file" accept=".nessus" (change)="nessusXmlOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Nessus CSV -->
+      @if (selectedSource === 'nessus') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .csv file</span>
+            <input cdkFocusInitial type="file" accept=".csv" (change)="nessusCsvOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Trivy -->
+      @if (selectedSource === 'trivy') {
+        <div class="source-panel">
+          <div class="tool-info">
+            <span class="tool-info-text">Open source security scanner: <a class="tool-link" target="_blank" href="https://trivy.dev/">Trivy</a></span>
+            <div class="code-block">
+              <code>$ <span class="code-accent">trivy fs . -f json -o r.json</span></code>
+            </div>
+          </div>
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="trivyOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Jira XML -->
+      @if (selectedSource === 'jira_xml') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .xml file</span>
+            <input cdkFocusInitial type="file" accept=".xml" (change)="jiraOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- npm audit -->
+      @if (selectedSource === 'npm_audit') {
+        <div class="source-panel">
+          <div class="tool-info">
+            <span class="tool-info-text">JavaScript package manager: <a class="tool-link" target="_blank" href="https://www.npmjs.com/">NPM</a></span>
+            <div class="code-block">
+              <code>$ <span class="code-accent">npm audit --json</span></code>
+            </div>
+          </div>
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="npmAuditOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Semgrep -->
+      @if (selectedSource === 'semgrep') {
+        <div class="source-panel">
+          <div class="tool-info">
+            <span class="tool-info-text">Open source static analysis: <a class="tool-link" target="_blank" href="https://semgrep.dev/">Semgrep</a></span>
+            <div class="code-block">
+              <code>$ <span class="code-accent">semgrep scan --json</span></code>
+            </div>
+            <mat-checkbox [formControl]="mergeperpath" class="check-option">Group results by path?</mat-checkbox>
+          </div>
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="semgrepOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Composer -->
+      @if (selectedSource === 'composer') {
+        <div class="source-panel">
+          <div class="tool-info">
+            <span class="tool-info-text">PHP dependency manager: <a class="tool-link" target="_blank" href="https://getcomposer.org/">Composer</a></span>
+            <div class="code-block">
+              <code>$ <span class="code-accent">composer audit --format=json</span></code>
+            </div>
+          </div>
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="composerOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- WIZ -->
+      @if (selectedSource === 'wiz') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .csv file</span>
+            <input cdkFocusInitial type="file" accept=".csv" (change)="wizOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- ZAProxy -->
+      @if (selectedSource === 'zaproxy') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="zaproxyOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      <!-- Codesight -->
+      @if (selectedSource === 'codesight') {
+        <div class="source-panel">
+          <div class="upload-zone">
+            <mat-icon class="upload-icon">upload_file</mat-icon>
+            <span class="upload-label">Select .json file</span>
+            <input cdkFocusInitial type="file" accept=".json" (change)="codesightOnFileSelect($event.target)" class="file-input">
+          </div>
+        </div>
+      }
+
+      @if (sourceBusy && selectedSource !== 'vulnrepojson') {
+        <div class="progress-row">
+          <span class="progress-label">Importing…</span>
+          <mat-progress-bar color="accent" mode="indeterminate" class="progress-bar"></mat-progress-bar>
+        </div>
+      }
+
+      @if (sourceError) {
+        <div class="error-banner">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          {{ sourceError }}
+        </div>
+      }
+
+      @if (selectedSource !== 'vulnrepojson') {
+        <div class="step-actions">
+          <button class="ghost-btn" (click)="backToTiles()">Back</button>
+        </div>
+      }
+
+    </div>
+  }
+
   <!-- ── WIZARD MODE ───────────────────────────────────────────────────── -->
   @if (mode === 'wizard') {
     <div class="adia-body wizard-body">
@@ -193,20 +484,17 @@
 
             <p class="step-desc">
               The wizard found <strong>{{ records.length }}</strong> record(s).
-              Select the path that points to the array of items to import.
+              Select one or more paths to import — records from all selected paths are merged.
             </p>
 
             @if (detectedArrayPaths.length > 0) {
               <div class="field-group">
-                <label class="field-label">Detected array paths</label>
+                <label class="field-label">Detected array paths <span class="field-hint">(click to toggle)</span></label>
                 <div class="path-chip-row">
                   @for (p of detectedArrayPaths; track p) {
-                    <button class="path-chip" [class.path-chip-active]="itemsPath === p" (click)="applyItemsPath(p)">
+                    <button class="path-chip" [class.path-chip-active]="isPathActive(p)" (click)="togglePath(p)">
                       {{ p === '$' ? '$ (root array)' : p }}
-                      <span class="path-chip-count">
-                        @if (p === '$') { {{ parsedRaw?.length }} }
-                        @else { {{ resolvePath(parsedRaw, p)?.length ?? 0 }} }
-                      </span>
+                      <span class="path-chip-count">{{ recordsForPath(p) }}</span>
                     </button>
                   }
                 </div>
@@ -214,10 +502,25 @@
             }
 
             <div class="field-group">
-              <label class="field-label">Items path <span class="field-hint">(dot notation, e.g. <code>results.items</code> — use <code>$</code> for root array/object)</span></label>
+              <label class="field-label">Items paths <span class="field-hint">(dot notation, <code>$</code> = root, <code>*</code> = flatten arrays/maps, e.g. <code>vulnerabilities.*</code>)</span></label>
+              @if (itemsPaths.length > 0) {
+                <div class="path-chip-row active-paths-row">
+                  @for (p of itemsPaths; track p) {
+                    <span class="path-chip path-chip-selected">
+                      {{ p === '$' ? '$ (root array)' : p }}
+                      <span class="path-chip-count">{{ recordsForPath(p) }}</span>
+                      <button class="path-chip-remove" (click)="removePath(p)" title="Remove path">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </span>
+                  }
+                </div>
+              }
               <div class="path-input-row">
-                <input class="path-input" [(ngModel)]="itemsPath" placeholder="e.g. vulnerabilities or $ for root" />
-                <button class="ghost-btn sm-btn" (click)="applyItemsPath(itemsPath)">Apply</button>
+                <input class="path-input" [(ngModel)]="itemsPathDraft" placeholder="Add path, e.g. vulnerabilities.* or results.items" (keyup.enter)="addDraftPath()" />
+                <button class="ghost-btn sm-btn" [disabled]="!itemsPathDraft.trim()" (click)="addDraftPath()">
+                  <mat-icon>add</mat-icon> Add
+                </button>
               </div>
               @if (records.length > 0) {
                 <span class="path-result-info">→ {{ records.length }} record(s) loaded · {{ availableKeys.length }} fields detected</span>
@@ -313,6 +616,7 @@
                     <tr><td><code>{{fieldName}}</code></td><td>Value of <em>fieldName</em> in the record</td></tr>
                     <tr><td><code>{{parent.child}}</code></td><td>Nested field access</td></tr>
                     <tr><td><code>{{items[0]}}</code></td><td>First element of an array</td></tr>
+                    <tr><td><code>{{items.*.name}}</code></td><td>All <em>name</em> values across array (joined)</td></tr>
                     <tr><td><code>{{a}} — {{b}}</code></td><td>Concatenation with literal text</td></tr>
                     <tr><td><code>{{f | upper}}</code></td><td>Uppercase</td></tr>
                     <tr><td><code>{{f | lower}}</code></td><td>Lowercase</td></tr>

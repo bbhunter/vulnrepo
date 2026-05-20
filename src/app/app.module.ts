@@ -45,7 +45,6 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { MatSelectModule } from '@angular/material/select';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { DatePipe } from '@angular/common';
-import { DialogImportComponent } from './dialog-import/dialog-import.component';
 import { DialogEditComponent } from './dialog-edit/dialog-edit.component';
 import { ImportReportComponent } from './import-report/import-report.component';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -73,6 +72,8 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AsvsComponent } from './asvs/asvs.component';
 import { DialogAsvs4Component } from './dialog-asvs4/dialog-asvs4.component';
+import { DialogAsvsResetComponent } from './dialog-asvs-reset/dialog-asvs-reset.component';
+import { DialogAsvsExportComponent } from './dialog-asvs-export/dialog-asvs-export.component';
 import { TbhmComponent } from './tbhm/tbhm.component';
 import { Pcidss4Component } from './pcidss4/pcidss4.component';
 import { DialogPcidss4Component } from './dialog-pcidss4/dialog-pcidss4.component';
@@ -106,7 +107,6 @@ import { MatStepperModule } from '@angular/material/stepper';
         ReportComponent,
         DialogPassComponent,
         DialogAddissueComponent,
-        DialogImportComponent,
         DialogEditComponent,
         ImportReportComponent,
         DialogExportissuesComponent,
@@ -125,6 +125,8 @@ import { MatStepperModule } from '@angular/material/stepper';
         TemplatesListComponent,
         AsvsComponent,
         DialogAsvs4Component,
+        DialogAsvsResetComponent,
+        DialogAsvsExportComponent,
         TbhmComponent,
         Pcidss4Component,
         DialogPcidss4Component,

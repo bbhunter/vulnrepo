@@ -5,7 +5,10 @@ export interface ImportVector {
   id: string;
   name: string;
   format: 'json' | 'xml' | 'csv';
+  /** Legacy single path — kept for backward compatibility */
   itemsPath: string;
+  /** One or more paths whose records are unioned at import time */
+  itemsPaths?: string[];
   fieldMappings: Record<string, string>;
   /** Flat key list from first parsed record — used for auto-detection */
   sampleKeys: string[];

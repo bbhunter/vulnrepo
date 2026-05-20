@@ -1,0 +1,160 @@
+<div class="export-shell">
+
+  <div class="export-header">
+    <div class="export-header-left">
+      <div class="export-icon-wrap">
+        <mat-icon class="export-icon">file_download</mat-icon>
+      </div>
+      <div class="export-header-text">
+        <span class="export-title">Export ASVS requirements</span>
+        <span class="export-subtitle">
+          {{ destination === 'file' ? 'Save as encrypted .vuln archive' : 'Append directly to an open report' }}
+        </span>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="tool-btn close-btn" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="export-body">
+
+    <!-- What to export -->
+    <div class="field-block">
+      <label class="field-label">What to export</label>
+      <div class="segmented">
+        <button type="button" class="seg-btn"
+                [class.seg-btn-active]="selected === 'checked'"
+                (click)="selected = 'checked'"
+                [attr.aria-pressed]="selected === 'checked'">
+          <mat-icon class="seg-icon">check_circle</mat-icon>
+          <span class="seg-text">Selected</span>
+          <span class="seg-count">{{selecteditems.length}}</span>
+        </button>
+        <button type="button" class="seg-btn"
+                [class.seg-btn-active]="selected === 'unsel'"
+                (click)="selected = 'unsel'"
+                [attr.aria-pressed]="selected === 'unsel'">
+          <mat-icon class="seg-icon">radio_button_unchecked</mat-icon>
+          <span class="seg-text">Unselected</span>
+          <span class="seg-count">{{unselected.length}}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Destination -->
+    <div class="field-block">
+      <label class="field-label">Destination</label>
+      <div class="segmented">
+        <button type="button" class="seg-btn"
+                [class.seg-btn-active]="destination === 'file'"
+                (click)="setDestination('file')"
+                [attr.aria-pressed]="destination === 'file'">
+          <mat-icon class="seg-icon">save_alt</mat-icon>
+          <span class="seg-text">Download .vuln</span>
+        </button>
+        <button type="button" class="seg-btn"
+                [class.seg-btn-active]="destination === 'report'"
+                [class.seg-btn-disabled]="!unlockedReports.length && !loadingReports"
+                [disabled]="!unlockedReports.length && !loadingReports"
+                (click)="setDestination('report')"
+                [attr.aria-pressed]="destination === 'report'">
+          <mat-icon class="seg-icon">playlist_add</mat-icon>
+          <span class="seg-text">Add to report</span>
+        </button>
+      </div>
+      @if (!unlockedReports.length && !loadingReports) {
+        <span class="field-hint">No unlocked reports — open and decrypt a report to enable this option.</span>
+      }
+    </div>
+
+    <!-- File export: encryption key -->
+    @if (destination === 'file') {
+      <div class="field-block">
+        <label class="field-label">Encryption key</label>
+
+        <div class="pw-field">
+          <mat-icon class="pw-icon">lock</mat-icon>
+          <input class="pw-input"
+                 [type]="hide ? 'password' : 'text'"
+                 placeholder="Set report security key"
+                 [formControl]="pass"
+                 cdkFocusInitial
+                 aria-label="Encryption key">
+          <button type="button" class="pw-eye" (click)="hide = !hide"
+                  [attr.aria-label]="hide ? 'Show password' : 'Hide password'">
+            <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </div>
+
+        <div class="pw-field">
+          <mat-icon class="pw-icon">lock_reset</mat-icon>
+          <input class="pw-input"
+                 [type]="hide ? 'password' : 'text'"
+                 placeholder="Re-enter security key"
+                 [formControl]="pass2"
+                 aria-label="Confirm encryption key">
+          <button type="button" class="pw-eye" (click)="hide = !hide"
+                  [attr.aria-label]="hide ? 'Show password' : 'Hide password'">
+            <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Report destination: target picker -->
+    @if (destination === 'report') {
+      <div class="field-block">
+        <label class="field-label">Target report</label>
+        @if (loadingReports) {
+          <div class="loading-hint">
+            <mat-icon class="hint-icon">hourglass_top</mat-icon>
+            <span>Looking up unlocked reports…</span>
+          </div>
+        } @else {
+          <div class="select-field">
+            <mat-icon class="select-icon">description</mat-icon>
+            <select class="select-input"
+                    [(ngModel)]="selectedReportId"
+                    aria-label="Target report">
+              @for (r of unlockedReports; track r.report_id) {
+                <option [value]="r.report_id">{{ r.report_name }}</option>
+              }
+            </select>
+            <mat-icon class="select-chevron">expand_more</mat-icon>
+          </div>
+        }
+      </div>
+    }
+
+    @if (text) {
+      <div class="error-banner" role="alert">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <span>{{text}}</span>
+      </div>
+    }
+
+    <div class="hint-row">
+      <mat-icon class="hint-icon">info_outline</mat-icon>
+      @if (destination === 'file') {
+        <span class="hint-text">The .vuln file can be imported into any report.</span>
+      } @else {
+        <span class="hint-text">
+          Requirements will be appended as <strong>Info</strong>-severity issues. Notes are saved as PoC.
+        </span>
+      }
+    </div>
+
+  </mat-dialog-content>
+
+  <div class="export-actions">
+    <button class="btn-cancel" (click)="cancel()" [disabled]="saving">Cancel</button>
+    <button class="btn-confirm" (click)="primaryAction()" [disabled]="saving">
+      <mat-icon class="btn-icon">
+        {{ saving ? 'hourglass_top' : (destination === 'file' ? 'file_download' : 'playlist_add') }}
+      </mat-icon>
+      {{ saving ? 'Saving…' : (destination === 'file' ? 'Download' : 'Add to report') }}
+    </button>
+  </div>
+
+</div>
