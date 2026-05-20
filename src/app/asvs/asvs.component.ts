@@ -27,7 +27,7 @@ asvsdata = [];
 selectlevel: string;
 param:any;
 renderedData:any;
-localstorageasvs4 = JSON.parse(localStorage.getItem("asvs4") || '{}');
+localstorageasvs4 = JSON.parse(localStorage.getItem("asvs") || '{}');
 dialogRef: MatDialogRef<DialogAsvs4Component>;
 
 constructor(private http: HttpClient, public dialog: MatDialog){
@@ -35,9 +35,9 @@ constructor(private http: HttpClient, public dialog: MatDialog){
     (s)=>{
           //console.log(s);
           if (this.selection.selected.length > 0) {
-            localStorage.setItem("asvs4", JSON.stringify(this.selection.selected));
+            localStorage.setItem("asvs", JSON.stringify(this.selection.selected));
           } else {
-            localStorage.removeItem("asvs4");
+            localStorage.removeItem("asvs");
           }
  
      }); 
@@ -219,9 +219,8 @@ resetselected() {
   if (window.confirm("Do you really want to clear results?")) {
     this.selection.clear();
     localStorage.removeItem("asvs4");
+    localStorage.removeItem("asvs");
   }
-  
-
 
 }
 

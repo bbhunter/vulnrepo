@@ -87,7 +87,7 @@ export class DialogAsvs4Component implements OnInit {
 
         const element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(ciphertext));
-        element.setAttribute('download', 'Vulnrepo asvs4 export.vuln');
+        element.setAttribute('download', 'Vulnrepo asvs export.vuln');
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();

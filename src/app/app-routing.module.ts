@@ -39,7 +39,7 @@ const routes: Routes = [{
   component: NewreportComponent
 },
 {
-  path: 'asvs4',
+  path: 'asvs',
   pathMatch: 'full',
   component: AsvsComponent
 },
