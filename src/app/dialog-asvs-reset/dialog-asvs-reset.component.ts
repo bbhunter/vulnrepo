@@ -1,5 +1,10 @@
-import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, Inject, Optional } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+
+interface ResetDialogData {
+  title?: string;
+  bodyHtml?: string;
+}
 
 @Component({
   selector: 'app-dialog-asvs-reset',
@@ -8,7 +13,17 @@ import { MatDialogRef } from '@angular/material/dialog';
   standalone: false
 })
 export class DialogAsvsResetComponent {
-  constructor(public dialogRef: MatDialogRef<DialogAsvsResetComponent>) {}
+  title: string;
+  bodyHtml: string;
+
+  constructor(
+    public dialogRef: MatDialogRef<DialogAsvsResetComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) data: ResetDialogData
+  ) {
+    this.title = data?.title || 'Reset ASVS checklist';
+    this.bodyHtml = data?.bodyHtml
+      || 'All selected requirements <strong class="highlight">and notes</strong> will be removed from your local storage.';
+  }
 
   cancel(): void {
     this.dialogRef.close(false);
