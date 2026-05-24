@@ -20,12 +20,27 @@
     letter-spacing: -0.02em;
     color: #fff;
     line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .header-count {
+    background: rgba(105, 240, 174, 0.12);
+    color: #69f0ae;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    border: 1px solid rgba(105, 240, 174, 0.25);
+    letter-spacing: 0;
   }
 
   .page-subtitle {
     display: block;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.62);
     margin-top: 3px;
   }
 
@@ -53,17 +68,11 @@
   overflow: hidden;
 }
 
-// ─── Sticky search header ────────────────────────────────────────────────────
+// ─── Search header (no longer sticky — table header takes that role) ─────────
 
-.search-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background: rgba(66, 66, 66, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+.search-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  padding: 16px 20px 10px;
+  padding: 16px 20px 6px;
 }
 
 .search-controls {
@@ -86,37 +95,17 @@
   }
 }
 
-// ─── Results bar ─────────────────────────────────────────────────────────────
+// ─── Results bar (paginator only) ────────────────────────────────────────────
 
 .results-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  justify-content: flex-end;
   min-height: 48px;
 
-  .results-count {
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.35);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .count-badge {
-    background: rgba(105, 240, 174, 0.12);
-    color: #69f0ae;
-    font-weight: 700;
-    padding: 1px 8px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    margin-right: 2px;
-    border: 1px solid rgba(105, 240, 174, 0.2);
-  }
-
   .compact-paginator {
-    flex: 1;
     background: transparent;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.78);
     min-height: unset;
   }
 }
@@ -133,21 +122,23 @@
   background: transparent !important;
 
   .mat-mdc-header-row {
-    background: rgba(255, 255, 255, 0.025) !important;
+    background: #3a3a3a !important;
   }
 
   .mat-mdc-header-cell {
-    font-size: 0.68rem !important;
+    font-size: 0.7rem !important;
     font-weight: 700 !important;
     letter-spacing: 0.09em !important;
     text-transform: uppercase !important;
-    color: rgba(255, 255, 255, 0.3) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    color: rgba(255, 255, 255, 0.62) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
     padding: 12px 16px !important;
+    background: #3a3a3a !important;
+    z-index: 10 !important;
   }
 
   .mat-mdc-cell {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
     padding: 14px 16px !important;
     vertical-align: middle;
   }
@@ -156,7 +147,9 @@
     transition: background 0.12s ease;
 
     &:hover {
-      background: rgba(105, 240, 174, 0.025) !important;
+      background: rgba(105, 240, 174, 0.06) !important;
+
+      .bb-external-icon { opacity: 1; }
     }
 
     &:last-child .mat-mdc-cell {
@@ -164,6 +157,9 @@
     }
   }
 }
+
+// Mobile-only label inside each cell — hidden on desktop
+.mobile-label { display: none; }
 
 // ─── Program name cell ───────────────────────────────────────────────────────
 
@@ -176,48 +172,42 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.92);
 
   &:hover .bb-program-name {
     color: #69f0ae;
   }
-
-  &:hover .bb-external-icon {
-    opacity: 1;
-  }
 }
 
 .bb-program-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: rgba(105, 240, 174, 0.1);
-  color: #69f0ae;
-  font-size: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  font-size: 12.5px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid rgba(105, 240, 174, 0.18);
+  border: 1px solid;
 }
 
 .bb-program-name {
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   transition: color 0.12s ease;
 }
 
 .bb-external-icon {
-  font-size: 13px;
-  width: 13px;
-  height: 13px;
-  color: rgba(255, 255, 255, 0.28);
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: rgba(255, 255, 255, 0.45);
   opacity: 0;
   transition: opacity 0.12s ease;
 }
 
-// ─── Reward badges ───────────────────────────────────────────────────────────
+// ─── Reward badges (icon-only) ───────────────────────────────────────────────
 
 .bb-td-bounty {
   white-space: nowrap;
@@ -226,38 +216,41 @@
 .reward-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 2px 8px 2px 5px;
-  border-radius: 4px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   margin-right: 6px;
+  cursor: default;
 
   mat-icon {
-    font-size: 13px;
-    width: 13px;
-    height: 13px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 }
 
 .reward-money {
-  background: rgba(105, 240, 174, 0.1);
+  background: rgba(105, 240, 174, 0.12);
   color: #69f0ae;
-  border: 1px solid rgba(105, 240, 174, 0.2);
+  border: 1px solid rgba(105, 240, 174, 0.25);
 }
 
 .reward-swag {
-  background: rgba(96, 165, 250, 0.1);
+  background: rgba(96, 165, 250, 0.12);
   color: #60a5fa;
-  border: 1px solid rgba(96, 165, 250, 0.2);
+  border: 1px solid rgba(96, 165, 250, 0.25);
 }
 
-// ─── Domain chips ─────────────────────────────────────────────────────────────
+.reward-empty {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+}
+
+// ─── Domain chips ────────────────────────────────────────────────────────────
 
 .bb-td-domains {
-  max-width: 440px;
+  max-width: 520px;
   white-space: normal;
   word-break: break-word;
 }
@@ -265,28 +258,79 @@
 .domain-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 500;
   font-family: 'Roboto Mono', 'Courier New', monospace;
-  color: rgba(255, 255, 255, 0.38);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  padding: 2px 8px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
   border-radius: 4px;
-  margin: 2px 3px 2px 0;
-  line-height: 1.6;
+  margin: 2px 4px 2px 0;
+  line-height: 1.5;
 }
 
-// ─── No data ─────────────────────────────────────────────────────────────────
+.domains-more {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #69f0ae;
+  background: transparent;
+  border: 1px dashed rgba(105, 240, 174, 0.35);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin: 2px 4px 2px 0;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+
+  &:hover {
+    background: rgba(105, 240, 174, 0.1);
+    border-color: rgba(105, 240, 174, 0.6);
+  }
+}
+
+// ─── State blocks (loading / empty) ──────────────────────────────────────────
 
 .no-data {
   text-align: center !important;
-  padding: 64px 20px !important;
-  color: rgba(255, 255, 255, 0.2) !important;
-  font-size: 0.875rem;
+  padding: 56px 20px !important;
   border-bottom: none !important;
+}
+
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.9rem;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .state-title {
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+  }
+
+  button {
+    margin-top: 4px;
+  }
+}
+
+.spin {
+  animation: bb-spin 1s linear infinite;
+}
+
+@keyframes bb-spin {
+  to { transform: rotate(360deg); }
 }
 
 // ─── Responsive — mobile (< 600px) ───────────────────────────────────────────
@@ -318,8 +362,8 @@
     border-radius: 8px;
   }
 
-  .search-sticky {
-    padding: 10px 12px 6px;
+  .search-header {
+    padding: 10px 12px 4px;
   }
 
   .search-controls {
@@ -330,38 +374,63 @@
   }
 
   .results-bar {
-    flex-wrap: wrap;
-    gap: 4px;
-
-    .results-count {
-      width: 100%;
-    }
+    justify-content: center;
 
     .compact-paginator {
       width: 100%;
     }
   }
 
-  .bb-td-domains {
-    max-width: unset;
+  // ─── Card layout — each row becomes a stacked card ─────────────────────────
+
+  .bb-table {
+    ::ng-deep .mat-mdc-header-row { display: none !important; }
+
+    .mat-mdc-row {
+      display: flex !important;
+      flex-direction: column;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    }
+
+    .mat-mdc-cell {
+      border-bottom: none !important;
+      padding: 4px 0 !important;
+      width: 100% !important;
+      box-sizing: border-box;
+    }
   }
 
-  // Hide domains column on mobile — too wide for small screens
-  ::ng-deep .mat-column-domains {
-    display: none;
+  .mobile-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 4px;
   }
 
   .bb-td-name {
     white-space: normal;
     word-break: break-word;
+    order: 1;
+  }
+
+  .bb-td-bounty {
+    order: 2;
+  }
+
+  .bb-td-domains {
+    max-width: unset;
+    order: 3;
   }
 
   .bb-program-link {
     flex-wrap: wrap;
   }
 
-  .bb-table .mat-mdc-cell,
-  .bb-table .mat-mdc-header-cell {
-    padding: 10px 12px !important;
+  .no-data {
+    padding: 40px 16px !important;
   }
 }

@@ -4,7 +4,10 @@
     <div class="page-title">
       <mat-icon class="title-icon">bug_report</mat-icon>
       <div>
-        <h1>Bug Bounty List</h1>
+        <h1>
+          Bug Bounty List
+          <span class="header-count" *ngIf="!isLoading">{{dataSource.data.length}}</span>
+        </h1>
         <span class="page-subtitle">Public bug bounty programs · <a class="bb-link" target="_blank" href="https://github.com/projectdiscovery/public-bugbounty-programs">projectdiscovery</a></span>
       </div>
     </div>
@@ -12,21 +15,21 @@
 
   <div class="search-panel">
 
-    <div class="search-sticky">
+    <div class="search-header">
       <div class="search-controls">
         <div class="search-input-wrapper">
           <mat-form-field appearance="outline" class="search-field" color="accent">
             <mat-label>Search programs or domains</mat-label>
             <mat-icon matPrefix>search</mat-icon>
             <input matInput (keyup)="applyFilter($event)" placeholder="Ex. google, cloudamqp.com..." #input>
+            <button *ngIf="input.value" mat-icon-button matSuffix aria-label="Clear search" (click)="clearFilter(input)">
+              <mat-icon>close</mat-icon>
+            </button>
           </mat-form-field>
         </div>
       </div>
 
       <div class="results-bar">
-        <span class="results-count">
-          <span class="count-badge">{{this.dataSource.data.length}}</span> programs
-        </span>
         <mat-paginator class="compact-paginator" color="accent" [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Select page"></mat-paginator>
       </div>
     </div>
@@ -37,8 +40,14 @@
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef class="bb-th">Program</th>
           <td mat-cell *matCellDef="let element" class="bb-td bb-td-name">
-            <a class="bb-program-link active-link" target="_blank" href="{{element.url}}">
-              <span class="bb-program-avatar">{{element.name?.charAt(0)?.toUpperCase()}}</span>
+            <span class="mobile-label">Program</span>
+            <a class="bb-program-link active-link" target="_blank" [href]="element.url">
+              <span class="bb-program-avatar"
+                    [style.background]="'hsla(' + avatarHue(element.name) + ', 70%, 55%, 0.16)'"
+                    [style.color]="'hsl(' + avatarHue(element.name) + ', 80%, 72%)'"
+                    [style.border-color]="'hsla(' + avatarHue(element.name) + ', 70%, 55%, 0.32)'">
+                {{element.name?.charAt(0)?.toUpperCase()}}
+              </span>
               <span class="bb-program-name">{{element.name}}</span>
               <mat-icon class="bb-external-icon">open_in_new</mat-icon>
             </a>
@@ -48,27 +57,50 @@
         <ng-container matColumnDef="bounty">
           <th mat-header-cell *matHeaderCellDef class="bb-th">Rewards</th>
           <td mat-cell *matCellDef="let element" class="bb-td bb-td-bounty">
-            <span class="reward-badge reward-money" *ngIf="element.bounty">
-              <mat-icon>attach_money</mat-icon> Bounty
+            <span class="mobile-label">Rewards</span>
+            <span class="reward-badge reward-money" *ngIf="element.bounty"
+                  matTooltip="Paid bounty" aria-label="Paid bounty">
+              <mat-icon>attach_money</mat-icon>
             </span>
-            <span class="reward-badge reward-swag" *ngIf="element.swag">
-              <mat-icon>redeem</mat-icon> Swag
+            <span class="reward-badge reward-swag" *ngIf="element.swag"
+                  matTooltip="Swag rewards" aria-label="Swag rewards">
+              <mat-icon>redeem</mat-icon>
             </span>
+            <span class="reward-empty" *ngIf="!element.bounty && !element.swag">—</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="domains">
           <th mat-header-cell *matHeaderCellDef class="bb-th">Domains</th>
           <td mat-cell *matCellDef="let element" class="bb-td bb-td-domains">
-            <span class="domain-chip" *ngFor="let d of element.domains">{{d}}</span>
+            <span class="mobile-label">Domains</span>
+            <span class="domain-chip" *ngFor="let d of domainsPreview(element.domains, element.name)">{{d}}</span>
+            <button *ngIf="canToggle(element.domains)" type="button" class="domains-more"
+                    (click)="toggleDomains(element.name)">
+              {{ expandedDomains.has(element.name) ? 'show less' : '+' + remainingDomains(element.domains) + ' more' }}
+            </button>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="bb-row"></tr>
 
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell no-data" colspan="3">No programs matching "{{input.value}}"</td>
+          <td class="mat-cell no-data" colspan="3">
+            <div *ngIf="isLoading" class="state-block loading-state">
+              <mat-icon class="spin">progress_activity</mat-icon>
+              <span>Loading programs…</span>
+            </div>
+            <div *ngIf="!isLoading && input.value" class="state-block empty-state">
+              <mat-icon>search_off</mat-icon>
+              <div class="state-title">No programs matching "{{input.value}}"</div>
+              <button mat-stroked-button color="accent" (click)="clearFilter(input)">Clear filter</button>
+            </div>
+            <div *ngIf="!isLoading && !input.value" class="state-block empty-state">
+              <mat-icon>inbox</mat-icon>
+              <div class="state-title">No programs available</div>
+            </div>
+          </td>
         </tr>
 
       </table>
