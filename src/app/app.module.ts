@@ -59,6 +59,7 @@ import { DialogCvssComponent } from './dialog-cvss/dialog-cvss.component';
 import { MatRadioModule } from '@angular/material/radio';
 import { HammerModule } from '@angular/platform-browser';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogCveComponent } from './dialog-cve/dialog-cve.component';
 import { FaqComponent } from './faq/faq.component';
 import { DialogCustomcontentComponent } from './dialog-customcontent/dialog-customcontent.component';
@@ -183,6 +184,7 @@ import { MatStepperModule } from '@angular/material/stepper';
         MatRadioModule,
         HammerModule,
         MatProgressBarModule,
+        MatProgressSpinnerModule,
         ClipboardModule,
         MatTooltipModule,
         MatSliderModule,
