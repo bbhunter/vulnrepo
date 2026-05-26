@@ -21,7 +21,14 @@
   <!-- Body -->
   <mat-dialog-content class="history-body">
 
-    @if (!anyreports) {
+    @if (loading) {
+      <div class="loading-state">
+        <mat-progress-spinner mode="indeterminate" diameter="48" color="accent"></mat-progress-spinner>
+        <p class="loading-text">Please wait, loading history…</p>
+      </div>
+    }
+
+    @if (!loading && !anyreports) {
       <div class="empty-state">
         <mat-icon class="empty-icon">history_toggle_off</mat-icon>
         <p class="empty-title">No saved versions</p>
@@ -29,7 +36,7 @@
       </div>
     }
 
-    @if (anyreports) {
+    @if (!loading && anyreports) {
       <table mat-table [dataSource]="dataSource" matSort matSortActive="report_lastupdate" matSortDirection="desc" class="history-table">
 
         <ng-container matColumnDef="report_name">

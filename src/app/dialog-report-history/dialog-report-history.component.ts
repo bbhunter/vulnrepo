@@ -18,6 +18,7 @@ export class DialogReportHistoryComponent implements OnInit {
   displayedColumns: string[] = ['report_name', 'report_lastupdate', 'settings'];
   dataSource = new MatTableDataSource([]);
   anyreports = false;
+  loading = false;
 
   @ViewChild(MatSort) set sort(sort: MatSort) {
     if (sort) this.dataSource.sort = sort;
@@ -39,6 +40,7 @@ export class DialogReportHistoryComponent implements OnInit {
 
 
   getreports(): void {
+    this.loading = true;
     this.indexeddbService.getReportsHistory(this.data).then(retdata => {
       if (retdata.length > 0) {
         this.anyreports = true;
@@ -47,10 +49,11 @@ export class DialogReportHistoryComponent implements OnInit {
         this.dataSource.data = [];
         this.anyreports = false;
       }
+      this.loading = false;
     });
   }
 
-  downloadhistoryreport(report): void {
+  downloadhistoryreport(report: any): void {
 
     const enc = btoa(JSON.stringify(report));
     const blob = new Blob([encodeURIComponent(enc)], { type: 'text/plain' });
@@ -65,7 +68,7 @@ export class DialogReportHistoryComponent implements OnInit {
 
   }
 
-  replacereport(report): void {
+  replacereport(report: any): void {
 
     const importreport = report;
 
@@ -86,7 +89,7 @@ export class DialogReportHistoryComponent implements OnInit {
 
   }
 
-  removereporthistory(report): void {
+  removereporthistory(report:any): void {
 
     this.indexeddbService.deletesingleReporthistory(report).then(data => {
       if (data) {
