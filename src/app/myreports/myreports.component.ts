@@ -362,6 +362,7 @@ export class MyreportsComponent implements OnInit, OnDestroy {
     });
     this.dataSource.data = this.list;
     this.dataSource.paginator = this.paginator;
+    console.log(this.list);
   }
 
   Redirectme(url: any) {

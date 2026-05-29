@@ -37,7 +37,7 @@ export class DialogOllamaSettingsComponent {
         this.models = ret[0];
 
         this.aiselectedValue = this.models.model;
-        this.ollamaurl = this.models.ollama_url;
+        this.ollamaurl = this.models.ollama_url || 'http://localhost:11434';
         this.temperature = this.models.temperature;
         this.defaultprompt.setValue(this.models.defaultprompt);
         
@@ -51,7 +51,7 @@ export class DialogOllamaSettingsComponent {
 
     if(this.models) {
       this.aiselectedValue = this.models.model;
-      this.ollamaurl = this.models.ollama_url;
+      this.ollamaurl = this.models.ollama_url || 'http://localhost:11434';
     }
   
 

@@ -1094,7 +1094,7 @@ export class SettingsComponent implements OnInit {
     let check = false;
       if(this.models) {
         this.aiselectedValue = this.models.model;
-        this.ollamaurl = this.models.ollama_url;
+        this.ollamaurl = this.models.ollama_url || 'http://localhost:11434';
         check = true;
       }
     
