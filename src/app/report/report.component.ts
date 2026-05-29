@@ -3315,7 +3315,7 @@ Info       | ${sevCounts.Info}\n\n`;
       { "filename": "crypto-js/4.1.1/crypto-js.min.js", "integrity": "sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" },
       { "filename": "bootstrap/5.2.3/js/bootstrap.bundle.min.js", "integrity": "sha512-i9cEfJwUwViEPFKdC1enz4ZRGBj8YQo6QByFTF92YXHi7waCqyexvRD75S5NVTsSiTv7rKWqG9Y5eFxmRsOn0A==" },
       { "filename": "marked/15.0.0/marked.min.js", "integrity": "sha512-/tpw1ej/DTEJDoX8qZM1YY8H9bz2+2T9nhojBmizu9JDVNvjXvgA3zfRjVF96V3bwK6Uf3eIqrYKIKRZx203iA==" },
-      { "filename": "dompurify/2.4.1/purify.min.js", "integrity": "sha512-uHOKtSfJWScGmyyFr2O2+efpDx2nhwHU2v7MVeptzZoiC7bdF6Ny/CmZhN2AwIK1oCFiVQQ5DA/L9FSzyPNu6Q==" },
+      { "filename": "dompurify/3.4.7/purify.min.js", "integrity": "sha512-ARJaoWDaMaVH3/ChkgWAZPzN/V74aBQ9O0NYMsRmoYYqNLJ+uaq013+OnaQaYNvmlHGxrNbq/KL8U04A97A0cQ==" },
       { "filename": "Chart.js/4.4.0/chart.umd.js", "integrity": "sha512-6HrPqAvK+lZElIZ4mZ64fyxIBTsaX5zAFZg2V/2WT+iKPrFzTzvx6QAsLW2OaLwobhMYBog/+bvmIEEGXi0p1w==" },
       { "filename": "highlight.js/11.10.0/highlight.min.js", "integrity": "sha512-6yoqbrcLAHDWAdQmiRlHG4+m0g/CT/V9AGyxabG8j7Jk8j3r3K6due7oqpiRMZqcYe9WM2gPcaNNxnl2ux+3tA==" },
       { "filename": "marked-highlight/2.2.1/index.umd.min.js", "integrity": "sha512-T5TNAGHd65imlc6xoRDq9hARHowETqOlOGMJ443E+PohphJHbzPpwQNBtcpmcjmHmQKLctZ/W3H2cY/T8EGDPA==" }
@@ -3368,7 +3368,7 @@ Info       | ${sevCounts.Info}\n\n`;
               res = res.replace("<depstyle></depstyle>", css_String);
               css_String = "";
 
-              of("jquery/3.6.3/jquery.min.js", "crypto-js/4.1.1/crypto-js.min.js", "bootstrap/5.2.3/js/bootstrap.bundle.min.js", "marked/15.0.0/marked.min.js", "dompurify/2.4.1/purify.min.js", "chart-js/4.4.0/chart.js", "highlight.js/11.10.0/highlight.min.js", "marked-highlight/2.2.1/index.umd.min.js")
+              of("jquery/3.6.3/jquery.min.js", "crypto-js/4.1.1/crypto-js.min.js", "bootstrap/5.2.3/js/bootstrap.bundle.min.js", "marked/15.0.0/marked.min.js", "dompurify/3.4.7/purify.min.js", "chart-js/4.4.0/chart.js", "highlight.js/11.10.0/highlight.min.js", "marked-highlight/2.2.1/index.umd.min.js")
                 .pipe(
                   concatMap(ind => {
                     let obs1 = this.http.get('/assets/res/' + ind, { responseType: 'text' })

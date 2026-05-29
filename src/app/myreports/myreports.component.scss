@@ -413,8 +413,6 @@ $sev-info:     #60a5fa;
       gap: 12px;
     }
 
-    .sev-total { display: none; }
-
     .card-no-stats span { display: none; }
   }
 }
@@ -484,10 +482,12 @@ $sev-info:     #60a5fa;
 }
 
 .card-badges {
-  display: flex;
-  gap: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: 1;
   min-width: 0;
+  line-height: 1;
 }
 
 .card-actions {
@@ -498,25 +498,17 @@ $sev-info:     #60a5fa;
 .storage-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 7px 2px 5px;
-  border-radius: 4px;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   flex-shrink: 0;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
   line-height: 1;
 
   mat-icon {
-    font-size: 11px;
-    width: 11px;
-    height: 11px;
-  }
-
-  .badge-label {
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
   }
 
   &.local {
@@ -620,11 +612,28 @@ $sev-info:     #60a5fa;
   &.sev-info     { color: var(--sev-info);     border-color: rgba(var(--sev-info-rgb), 0.3);      background: rgba(var(--sev-info-rgb), 0.09); }
 }
 
-.sev-total {
-  font-size: 0.68rem;
-  color: $text-muted;
+.sev-total-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  margin-left: 2px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #69f0ae;
+  background: #0000;
+  border: 1px solid rgba(105, 240, 174, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 
 // ─── No stats placeholder ─────────────────────────────────────────────────────
@@ -798,6 +807,4 @@ $sev-info:     #60a5fa;
   .cards-grid {
     grid-template-columns: 1fr;
   }
-
-  .storage-badge .badge-label { display: none; }
 }
