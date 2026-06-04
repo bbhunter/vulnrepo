@@ -1390,7 +1390,8 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
   openDialogCVE(data: any): void {
 
     const dialogRef = this.dialog.open(DialogCveComponent, {
-      width: '700px',
+      width: '960px',
+      maxWidth: '95vw',
       disableClose: false,
       panelClass: 'dark-dialog-panel',
       data: data
