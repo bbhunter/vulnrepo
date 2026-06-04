@@ -1315,6 +1315,25 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   }
 
+  selectBySeverity(severity: string) {
+
+    this.pok = 1;
+    this.selectedIssues = [];
+
+    this.decryptedReportDataChanged.report_vulns.forEach((element, ind) => {
+      if (element.severity === severity) {
+        this.selectedIssues.push({ "index": ind, "data": element });
+      }
+    });
+
+  }
+
+  hasSeverityInReport(severity: string): boolean {
+    return this.decryptedReportDataChanged?.report_vulns?.some(
+      (el: any) => el.severity === severity
+    );
+  }
+
   deselectall() {
 
 

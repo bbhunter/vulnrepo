@@ -858,11 +858,9 @@
                     </div>
                     }
                     @if (decryptedReportDataChanged) {
-                    <button mat-icon-button
-                      style="width: 30px; height: 30px; line-height: 5px; border-radius: 70%;padding: 0px;"
-                      title="Edit issue title" [routerLink]="[]"
+                    <button mat-icon-button class="issue-edit-title-btn" title="Edit issue title" [routerLink]="[]"
                       (click)="editissuetitle(dec_data);$event.stopPropagation();">
-                      <mat-icon class="vertical-align-middle valign-issues-center padding-bottom-3">edit</mat-icon>
+                      <mat-icon>edit</mat-icon>
                     </button>
                     }
                     @if (dec_data.files.length > 0) {
@@ -1080,24 +1078,51 @@
                   <mat-icon>settings</mat-icon>
                   <div class="sel-actions-row">
                     <div class="sel-actions-left">
+                      @if (selectedIssues.length > 1) {
                       <button class="sel-btn sel-btn--accent" (click)="selectall()">
                         <mat-icon>done_all</mat-icon>
                         Select all
                       </button>
-                      <button class="sel-btn sel-btn--accent" (click)="deselectall()">
-                        <mat-icon>done_all</mat-icon>
-                        Clear ({{ selectedIssues.length }})
+                      }
+                      @if (selectedIssues.length > 1) {
+                      <button class="sel-btn sel-btn--accent" [matMenuTriggerFor]="selBySeverityMenu">
+                        <mat-icon>filter_list</mat-icon>
+                        Select by severity
                       </button>
+                      <mat-menu #selBySeverityMenu="matMenu">
+                        @if (hasSeverityInReport('Critical')) {
+                        <button mat-menu-item (click)="selectBySeverity('Critical')">Critical</button>
+                        }
+                        @if (hasSeverityInReport('High')) {
+                        <button mat-menu-item (click)="selectBySeverity('High')">High</button>
+                        }
+                        @if (hasSeverityInReport('Medium')) {
+                        <button mat-menu-item (click)="selectBySeverity('Medium')">Medium</button>
+                        }
+                        @if (hasSeverityInReport('Low')) {
+                        <button mat-menu-item (click)="selectBySeverity('Low')">Low</button>
+                        }
+                        @if (hasSeverityInReport('Info')) {
+                        <button mat-menu-item (click)="selectBySeverity('Info')">Info</button>
+                        }
+                      </mat-menu>
+                      }
+                      @if (selectedIssues.length > 1) {
                       <button class="sel-btn sel-btn--accent" (click)="openissuesedit(selectedIssues)">
                         <mat-icon>edit</mat-icon>
                         Edit ({{ selectedIssues.length }})
                       </button>
+                      }
                       @if (selectedIssues.length >= 2) {
                       <button class="sel-btn sel-btn--accent" (click)="openissuesmerge(selectedIssues)">
                         <mat-icon>low_priority</mat-icon>
                         Merge ({{ selectedIssues.length }})
                       </button>
                       }
+                        <button class="sel-btn sel-btn--accent" (click)="deselectall()">
+                        <mat-icon>done_all</mat-icon>
+                        Unselect ({{ selectedIssues.length }})
+                      </button>
                     </div>
                     <div class="sel-actions-right">
                       <button class="sel-btn sel-btn--danger" (click)="removeSelecteditems(selectedIssues)"
