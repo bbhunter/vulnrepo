@@ -1315,6 +1315,25 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   }
 
+  selectBySeverity(severity: string) {
+
+    this.pok = 1;
+    this.selectedIssues = [];
+
+    this.decryptedReportDataChanged.report_vulns.forEach((element, ind) => {
+      if (element.severity === severity) {
+        this.selectedIssues.push({ "index": ind, "data": element });
+      }
+    });
+
+  }
+
+  hasSeverityInReport(severity: string): boolean {
+    return this.decryptedReportDataChanged?.report_vulns?.some(
+      (el: any) => el.severity === severity
+    );
+  }
+
   deselectall() {
 
 
@@ -1353,7 +1372,9 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
   openDialogCVSS(data: any): void {
 
     const dialogRef = this.dialog.open(DialogCvssComponent, {
-      width: '800px',
+      width: '1100px',
+      maxWidth: '95vw',
+      panelClass: 'cvss-dialog-panel',
       disableClose: false,
       data: data
     });
@@ -1369,7 +1390,8 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
   openDialogCVE(data: any): void {
 
     const dialogRef = this.dialog.open(DialogCveComponent, {
-      width: '700px',
+      width: '960px',
+      maxWidth: '95vw',
       disableClose: false,
       panelClass: 'dark-dialog-panel',
       data: data
@@ -3915,7 +3937,9 @@ Info       | ${sevCounts.Info}\n\n`;
     const xxx = JSON.stringify(res);
 
     const dialogRef = this.dialog.open(DialogOllamaComponent, {
-      width: '800px',
+      width: '1040px',
+      maxWidth: '90vw',
+      panelClass: 'ollama-dialog-panel',
       disableClose: true,
       data: [{ "prompt": ``, "files": [{ "filename": this.report_info.report_name + ".json", "date": String(this.currentdateService.getcurrentDate()), "filetype": "json", "file": btoa(unescape(encodeURIComponent(xxx))) }], "images": [] }]
     });

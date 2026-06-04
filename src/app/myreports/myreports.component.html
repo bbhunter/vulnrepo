@@ -30,11 +30,6 @@
             <input matInput (keyup)="applyFilter($event)" placeholder="Filter reports..." #input>
           </mat-form-field>
         }
-        @if (selection.selected.length > 0) {
-          <button mat-button color="warn" (click)="removeSelecteditems()" class="delete-selected-btn">
-            <mat-icon>delete_forever</mat-icon> Remove selected ({{selection.selected.length}})
-          </button>
-        }
         <span class="filter-spacer"></span>
         @if (dataSource.data.length != 0) {
           <div class="sort-group">
@@ -219,6 +214,14 @@
       @if (displayItems.length === 0 && dataSource.filter) {
         <div class="empty-state" style="padding: 60px 24px;">
           <p class="empty-title">No reports match "{{dataSource.filter}}"</p>
+        </div>
+      }
+
+      @if (selection.selected.length > 0) {
+        <div class="table-footer-actions">
+          <button mat-button color="warn" (click)="removeSelecteditems()" class="delete-selected-btn">
+            <mat-icon>delete_forever</mat-icon> Remove selected ({{selection.selected.length}})
+          </button>
         </div>
       }
 

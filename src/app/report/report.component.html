@@ -199,7 +199,7 @@
                       [(ngModel)]="decryptedReportDataChanged.report_scope"
                       value="{{decryptedReportDataChanged?.report_scope}}"></textarea>
                     <div style="position:absolute;top: 10px; right: 10px;">
-                      <button mat-icon-button color="accent" (click)="editorFullscreenScope()"
+                      <button mat-icon-button class="fullscreen-edit-btn" (click)="editorFullscreenScope()"
                         title="Fullscreen Text Editor">
                         <mat-icon>fullscreen</mat-icon>
                       </button>
@@ -650,32 +650,13 @@
           <!-- Kanban board view -->
           @if (kanbanView) {
 
-          <ng-template #kanbanCardTpl let-issue>
-            <div class="kanban-card kanban-card--{{ issue.severity | lowercase }}"
-              cdkDrag [cdkDragData]="issue"
-              (click)="editissuetitle(issue)" role="button" [title]="issue.title">
-              <div class="kanban-card-title">{{ issue.title }}</div>
-              <div class="kanban-card-meta">
-                <span class="sev-chip sev-chip--{{ issue.severity | lowercase }} kanban-sev-chip">{{ issue.severity }}</span>
-                @if (issue.cvss) {
-                <span class="kanban-card-cvss">CVSS {{ issue.cvss }}</span>
-                }
-              </div>
-              @if (issue.tags?.length > 0) {
-              <div class="kanban-card-tags">
-                @for (tag of issue.tags.slice(0, 3); track tag) {
-                <span class="kanban-tag tag-color-{{ tagColor(tag.name) }}">{{ tag.name }}</span>
-                }
-                @if (issue.tags.length > 3) {
-                <span class="kanban-tag kanban-tag--more">+{{ issue.tags.length - 3 }}</span>
-                }
-              </div>
-              }
-              <div class="kanban-drag-handle" cdkDragHandle title="Drag to change status">
-                <mat-icon>drag_indicator</mat-icon>
-              </div>
-            </div>
-          </ng-template>
+          <!--
+            Kanban card markup is inlined at each render site below (board view + swimlane view).
+            It cannot be moved into a shared <ng-template> + *ngTemplateOutlet, because
+            embedded views from *ngTemplateOutlet keep their declaration-site injector — so
+            CdkDrag would fail to find its parent CdkDropList via DI and (cdkDropListDropped)
+            would never fire (cards become un-droppable).
+          -->
 
           <ng-template #kanbanColHeaderTpl let-col>
             <div class="kanban-col-header kanban-col-header--{{ col.cssClass }}">
@@ -740,7 +721,30 @@
                 [cdkDropListData]="col.status"
                 (cdkDropListDropped)="dropKanban($event)">
                 @for (issue of getKanbanIssues(col.status); track issue) {
-                <ng-container *ngTemplateOutlet="kanbanCardTpl; context: { $implicit: issue }"></ng-container>
+                <div class="kanban-card kanban-card--{{ issue.severity | lowercase }}"
+                  cdkDrag [cdkDragData]="issue"
+                  (click)="editissuetitle(issue)" role="button" [title]="issue.title">
+                  <div class="kanban-card-title">{{ issue.title }}</div>
+                  <div class="kanban-card-meta">
+                    <span class="sev-chip sev-chip--{{ issue.severity | lowercase }} kanban-sev-chip">{{ issue.severity }}</span>
+                    @if (issue.cvss) {
+                    <span class="kanban-card-cvss">CVSS {{ issue.cvss }}</span>
+                    }
+                  </div>
+                  @if (issue.tags?.length > 0) {
+                  <div class="kanban-card-tags">
+                    @for (tag of issue.tags.slice(0, 3); track tag) {
+                    <span class="kanban-tag tag-color-{{ tagColor(tag.name) }}">{{ tag.name }}</span>
+                    }
+                    @if (issue.tags.length > 3) {
+                    <span class="kanban-tag kanban-tag--more">+{{ issue.tags.length - 3 }}</span>
+                    }
+                  </div>
+                  }
+                  <div class="kanban-drag-handle" cdkDragHandle title="Drag to change status">
+                    <mat-icon>drag_indicator</mat-icon>
+                  </div>
+                </div>
                 } @empty {
                 <div class="kanban-col-empty">Drop issues here</div>
                 }
@@ -767,7 +771,30 @@
                 [cdkDropListData]="col.status"
                 (cdkDropListDropped)="dropKanban($event)">
                 @for (issue of getSwimlaneIssues(col.status, sev); track issue) {
-                <ng-container *ngTemplateOutlet="kanbanCardTpl; context: { $implicit: issue }"></ng-container>
+                <div class="kanban-card kanban-card--{{ issue.severity | lowercase }}"
+                  cdkDrag [cdkDragData]="issue"
+                  (click)="editissuetitle(issue)" role="button" [title]="issue.title">
+                  <div class="kanban-card-title">{{ issue.title }}</div>
+                  <div class="kanban-card-meta">
+                    <span class="sev-chip sev-chip--{{ issue.severity | lowercase }} kanban-sev-chip">{{ issue.severity }}</span>
+                    @if (issue.cvss) {
+                    <span class="kanban-card-cvss">CVSS {{ issue.cvss }}</span>
+                    }
+                  </div>
+                  @if (issue.tags?.length > 0) {
+                  <div class="kanban-card-tags">
+                    @for (tag of issue.tags.slice(0, 3); track tag) {
+                    <span class="kanban-tag tag-color-{{ tagColor(tag.name) }}">{{ tag.name }}</span>
+                    }
+                    @if (issue.tags.length > 3) {
+                    <span class="kanban-tag kanban-tag--more">+{{ issue.tags.length - 3 }}</span>
+                    }
+                  </div>
+                  }
+                  <div class="kanban-drag-handle" cdkDragHandle title="Drag to change status">
+                    <mat-icon>drag_indicator</mat-icon>
+                  </div>
+                </div>
                 } @empty {
                 <div class="kanban-swim-empty">—</div>
                 }
@@ -831,11 +858,9 @@
                     </div>
                     }
                     @if (decryptedReportDataChanged) {
-                    <button mat-icon-button
-                      style="width: 30px; height: 30px; line-height: 5px; border-radius: 70%;padding: 0px;"
-                      title="Edit issue title" [routerLink]="[]"
+                    <button mat-icon-button class="issue-edit-title-btn" title="Edit issue title" [routerLink]="[]"
                       (click)="editissuetitle(dec_data);$event.stopPropagation();">
-                      <mat-icon class="vertical-align-middle valign-issues-center padding-bottom-3">edit</mat-icon>
+                      <mat-icon>edit</mat-icon>
                     </button>
                     }
                     @if (dec_data.files.length > 0) {
@@ -854,8 +879,8 @@
                     <textarea #textareaheight [(ngModel)]="dec_data.poc" (change)="changePoC(dec_data)" matInput
                       cdkTextareaAutosize cdkAutosizeMinRows="8" cdkAutosizeMaxRows="20"
                       placeholder="Steps to reproduce, command output, code snippets..."></textarea>
-                    <button mat-icon-button color="accent" (click)="editorFullscreenPoC(dec_data)"
-                      title="Fullscreen Text Editor" class="poc-fullscreen-btn">
+                    <button mat-icon-button (click)="editorFullscreenPoC(dec_data)"
+                      title="Fullscreen Text Editor" class="poc-fullscreen-btn fullscreen-edit-btn">
                       <mat-icon>fullscreen</mat-icon>
                     </button>
                   </div>
@@ -1053,24 +1078,51 @@
                   <mat-icon>settings</mat-icon>
                   <div class="sel-actions-row">
                     <div class="sel-actions-left">
+                      @if (selectedIssues.length > 1) {
                       <button class="sel-btn sel-btn--accent" (click)="selectall()">
                         <mat-icon>done_all</mat-icon>
                         Select all
                       </button>
-                      <button class="sel-btn sel-btn--accent" (click)="deselectall()">
-                        <mat-icon>done_all</mat-icon>
-                        Clear ({{ selectedIssues.length }})
+                      }
+                      @if (selectedIssues.length > 1) {
+                      <button class="sel-btn sel-btn--accent" [matMenuTriggerFor]="selBySeverityMenu">
+                        <mat-icon>filter_list</mat-icon>
+                        Select by severity
                       </button>
+                      <mat-menu #selBySeverityMenu="matMenu">
+                        @if (hasSeverityInReport('Critical')) {
+                        <button mat-menu-item (click)="selectBySeverity('Critical')">Critical</button>
+                        }
+                        @if (hasSeverityInReport('High')) {
+                        <button mat-menu-item (click)="selectBySeverity('High')">High</button>
+                        }
+                        @if (hasSeverityInReport('Medium')) {
+                        <button mat-menu-item (click)="selectBySeverity('Medium')">Medium</button>
+                        }
+                        @if (hasSeverityInReport('Low')) {
+                        <button mat-menu-item (click)="selectBySeverity('Low')">Low</button>
+                        }
+                        @if (hasSeverityInReport('Info')) {
+                        <button mat-menu-item (click)="selectBySeverity('Info')">Info</button>
+                        }
+                      </mat-menu>
+                      }
+                      @if (selectedIssues.length > 1) {
                       <button class="sel-btn sel-btn--accent" (click)="openissuesedit(selectedIssues)">
                         <mat-icon>edit</mat-icon>
                         Edit ({{ selectedIssues.length }})
                       </button>
+                      }
                       @if (selectedIssues.length >= 2) {
                       <button class="sel-btn sel-btn--accent" (click)="openissuesmerge(selectedIssues)">
                         <mat-icon>low_priority</mat-icon>
                         Merge ({{ selectedIssues.length }})
                       </button>
                       }
+                        <button class="sel-btn sel-btn--accent" (click)="deselectall()">
+                        <mat-icon>done_all</mat-icon>
+                        Unselect ({{ selectedIssues.length }})
+                      </button>
                     </div>
                     <div class="sel-actions-right">
                       <button class="sel-btn sel-btn--danger" (click)="removeSelecteditems(selectedIssues)"

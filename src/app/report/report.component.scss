@@ -25,9 +25,15 @@ $accent-green: #69f0ae;
 // Tags chip row inside issue header — hidden on mobile
 .issue-tags-hide-mobile {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  width: 100%;
+
+  ::ng-deep .mat-mdc-chip-set,
+  ::ng-deep .mdc-evolution-chip-set__chips {
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
 
   @media (max-width: 959px) { display: none; }
 }
@@ -37,13 +43,52 @@ $accent-green: #69f0ae;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 6px;
   width: 100%;
+  line-height: 1;
+
+  > * {
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 // Bounty icon + status chip in issue header — hidden on mobile
 .issue-hide-mobile {
+  display: inline-flex;
+  align-items: center;
+
   @media (max-width: 959px) { display: none; }
+}
+
+// Compact edit-title button in issue header — keeps the icon perfectly centered
+.issue-edit-title-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+
+  mat-icon,
+  ::ng-deep .mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  ::ng-deep .mat-mdc-button-touch-target {
+    height: 30px;
+    width: 30px;
+  }
 }
 
 // Selection toolbar inside the bulk-edit expansion panel
@@ -52,10 +97,51 @@ $accent-green: #69f0ae;
   padding: 6px 16px !important;
 }
 
+// Material clips and ellipses the header title/content by default, which
+// pushes our right-side buttons out of view when the row gets long.
+::ng-deep .mat-elevation-z9.mat-expansion-panel {
+  .mat-content,
+  .mat-content.mat-content-hide-toggle {
+    overflow: visible !important;
+    flex: 1 1 auto !important;
+    margin-right: 0 !important;
+  }
+
+  .mat-expansion-panel-header-title {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    margin-right: 0 !important;
+  }
+
+  .mat-expansion-panel-body {
+    overflow: visible !important;
+  }
+}
+
+// Pin the bulk-edit selection panel to the bottom of the viewport
+::ng-deep .mat-elevation-z9.mat-expansion-panel {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  margin: 0 !important;
+
+  @media (max-width: 599px) {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+}
+
 .sel-panel-title {
   display: flex !important;
   align-items: center;
   width: 100%;
+  min-width: 0;
   padding: 4px 0;
   gap: 10px;
 
@@ -73,6 +159,7 @@ $accent-green: #69f0ae;
   flex-wrap: wrap;
   align-items: center;
   flex: 1 1 0;
+  min-width: 0;
   gap: 6px;
 }
 
@@ -81,6 +168,7 @@ $accent-green: #69f0ae;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  min-width: 0;
   gap: 6px;
 }
 
@@ -484,21 +572,21 @@ $rh-text-muted: rgba(255, 255, 255, 0.38);
 @keyframes rh-save-pulse {
   0% {
     box-shadow:
-      0 0 0 0 rgba(22, 191, 110, 0.55),
-      0 0 0 1px rgba(22, 191, 110, 0.55),
-      0 0 14px rgba(22, 191, 110, 0.35);
+      0 0 0 0 rgba(105, 240, 174, 0.55),
+      0 0 0 1px rgba(105, 240, 174, 0.55),
+      0 0 14px rgba(105, 240, 174, 0.35);
   }
   70% {
     box-shadow:
-      0 0 0 10px rgba(22, 191, 110, 0),
-      0 0 0 1px rgba(22, 191, 110, 0.35),
-      0 0 14px rgba(22, 191, 110, 0.18);
+      0 0 0 10px rgba(105, 240, 174, 0),
+      0 0 0 1px rgba(105, 240, 174, 0.35),
+      0 0 14px rgba(105, 240, 174, 0.18);
   }
   100% {
     box-shadow:
-      0 0 0 0 rgba(22, 191, 110, 0),
-      0 0 0 1px rgba(22, 191, 110, 0.35),
-      0 0 14px rgba(22, 191, 110, 0.18);
+      0 0 0 0 rgba(105, 240, 174, 0),
+      0 0 0 1px rgba(105, 240, 174, 0.35),
+      0 0 14px rgba(105, 240, 174, 0.18);
   }
 }
 
@@ -800,7 +888,7 @@ tr.mat-mdc-footer-row td {
 }
 
 ::ng-deep .legend-item:hover {
-  color: #16bf6e !important;
+  color: #69f0ae !important;
 }
 
 mat-paginator {
@@ -984,7 +1072,7 @@ mat-paginator {
   font-size: 0.76rem !important;
   font-weight: 600 !important;
   letter-spacing: 0.015em;
-  box-shadow: 0 0 0 1px rgba(22, 191, 110, 0.35), 0 0 12px rgba(22, 191, 110, 0.18);
+  box-shadow: 0 0 0 1px rgba(105, 240, 174, 0.35), 0 0 12px rgba(105, 240, 174, 0.18);
 
   &__label {
     display: inline-flex;
@@ -2024,6 +2112,37 @@ mat-paginator {
   &:hover { background: rgba(255, 255, 255, 0.03) !important; }
 }
 
+// Long issue titles were pushing mat-panel-description (tags / status / edit
+// button) off the right edge because Material gives title+description equal
+// flex and .mat-content clips overflow. Truncate the title with ellipsis and
+// keep the description on a fixed shrink-zero track.
+::ng-deep .issue-panel {
+  .mat-content {
+    min-width: 0 !important;
+    align-items: center;
+  }
+
+  .mat-expansion-panel-header-title {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+
+    > div {
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .mat-expansion-panel-header-description {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    margin-right: 8px !important;
+    justify-content: flex-end;
+  }
+}
+
 
 ::ng-deep .issue-panel .mat-expansion-panel-content .mat-expansion-panel-body {
   padding: 0 16px 16px !important;
@@ -2056,6 +2175,11 @@ mat-paginator {
   position: absolute;
   top: 4px;
   right: 4px;
+}
+
+.fullscreen-edit-btn {
+  --mdc-icon-button-icon-color: #{$accent-green};
+  color: $accent-green !important;
 }
 
 .issue-form-meta-col {
@@ -2427,9 +2551,9 @@ mat-paginator {
   }
 
   &--active {
-    color: #16bf6e !important;
-    border-color: rgba(22, 191, 110, 0.45) !important;
-    background: rgba(22, 191, 110, 0.08) !important;
+    color: #69f0ae !important;
+    border-color: rgba(105, 240, 174, 0.45) !important;
+    background: rgba(105, 240, 174, 0.08) !important;
   }
 }
 
@@ -2502,7 +2626,7 @@ mat-paginator {
   outline: none;
   transition: border-color 0.2s ease;
 
-  &:focus { border-color: rgba(22, 191, 110, 0.6); }
+  &:focus { border-color: rgba(105, 240, 174, 0.6); }
 
   // hide native number spinners
   &::-webkit-outer-spin-button,

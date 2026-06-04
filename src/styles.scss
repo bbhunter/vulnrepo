@@ -4,26 +4,117 @@
 
 @import url('assets/fonts/material-icons/material-icons.css');
 
-$my-typography: mat.m2-define-typography-config($font-family: 'Roboto,Helvetica Neue,sans-serif',
-  );
+// ── Material 3 theme ────────────────────────────────────────────────────────
+// Green primary mirrors the consolidated --vr-accent (#69f0ae).
+// Neutrals/surfaces auto-derive from primary; error palette defaults to red.
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$green-palette,
+  ),
+  typography: (
+    plain-family: 'Roboto, Helvetica Neue, sans-serif',
+    brand-family: 'Roboto, Helvetica Neue, sans-serif',
+  ),
+  density: (
+    scale: 0,
+  ),
+));
 
-$primary: mat.m2-define-palette(mat.$m2-grey-palette, 900);
-$accent: mat.m2-define-palette(mat.$m2-green-palette, A200, A100, A400);
-$warn: mat.m2-define-palette(mat.$m2-red-palette, 900);
-
-$dark-theme: mat.m2-define-dark-theme((color: (primary: $primary,
-        accent: $accent,
-        warn: $warn,
-      ),
-      typography: $my-typography,
-      density: 0,
-    ));
+// M3 generates primary-derived component tokens as tone-80 of $green-palette,
+// which resolves to a harsh #02e600. Re-bind every such token to the softer
+// mint #69f0ae used everywhere else in the app.
+$primary-accent: #69f0ae;
+$mat-primary-tokens: (
+  // pseudo-checkbox
+  --mat-pseudo-checkbox-full-selected-icon-color,
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color,
+  // progress
+  --mat-progress-bar-active-indicator-color,
+  --mat-progress-spinner-active-indicator-color,
+  // form field
+  --mat-form-field-filled-caret-color,
+  --mat-form-field-filled-focus-active-indicator-color,
+  --mat-form-field-filled-focus-label-text-color,
+  --mat-form-field-focus-select-arrow-color,
+  --mat-form-field-outlined-caret-color,
+  --mat-form-field-outlined-focus-label-text-color,
+  --mat-form-field-outlined-focus-outline-color,
+  // select
+  --mat-select-focused-arrow-color,
+  // slide toggle
+  --mat-slide-toggle-selected-focus-state-layer-color,
+  --mat-slide-toggle-selected-focus-track-color,
+  --mat-slide-toggle-selected-hover-state-layer-color,
+  --mat-slide-toggle-selected-hover-track-color,
+  --mat-slide-toggle-selected-pressed-state-layer-color,
+  --mat-slide-toggle-selected-pressed-track-color,
+  --mat-slide-toggle-selected-track-color,
+  // radio
+  --mat-radio-checked-ripple-color,
+  --mat-radio-selected-focus-icon-color,
+  --mat-radio-selected-hover-icon-color,
+  --mat-radio-selected-icon-color,
+  --mat-radio-selected-pressed-icon-color,
+  // slider
+  --mat-slider-active-track-color,
+  --mat-slider-focus-handle-color,
+  --mat-slider-handle-color,
+  --mat-slider-hover-handle-color,
+  --mat-slider-label-container-color,
+  --mat-slider-ripple-color,
+  // list
+  --mat-list-list-item-selected-trailing-icon-color,
+  // tabs
+  --mat-tab-active-focus-indicator-color,
+  --mat-tab-active-hover-indicator-color,
+  --mat-tab-active-indicator-color,
+  // checkbox
+  --mat-checkbox-selected-focus-icon-color,
+  --mat-checkbox-selected-focus-state-layer-color,
+  --mat-checkbox-selected-hover-icon-color,
+  --mat-checkbox-selected-hover-state-layer-color,
+  --mat-checkbox-selected-icon-color,
+  --mat-checkbox-selected-pressed-icon-color,
+  --mat-checkbox-unselected-pressed-state-layer-color,
+  // buttons
+  --mat-button-filled-container-color,
+  --mat-button-outlined-label-text-color,
+  --mat-button-outlined-state-layer-color,
+  --mat-button-protected-label-text-color,
+  --mat-button-protected-state-layer-color,
+  --mat-button-text-label-text-color,
+  --mat-button-text-state-layer-color,
+  // datepicker
+  --mat-datepicker-calendar-date-preview-state-outline-color,
+  --mat-datepicker-calendar-date-selected-state-background-color,
+  --mat-datepicker-calendar-date-today-outline-color,
+  --mat-datepicker-calendar-date-today-selected-state-outline-color,
+  --mat-datepicker-toggle-active-state-icon-color,
+  // stepper
+  --mat-stepper-header-done-state-icon-background-color,
+  --mat-stepper-header-edit-state-icon-background-color,
+  --mat-stepper-header-selected-state-icon-background-color,
+);
 
 :root {
 
   @include mat.all-component-themes($dark-theme);
-  @include mat.all-component-typographies($my-typography);
-  @include mat.typography-hierarchy($my-typography);
+  @include mat.typography-hierarchy($dark-theme);
+
+  @each $token in $mat-primary-tokens {
+    #{$token}: #{$primary-accent};
+  }
+
+  // Tokens that use color-mix with the primary need explicit re-binding
+  --mat-slider-focus-state-layer-color: color-mix(in srgb, #{$primary-accent} 20%, transparent);
+  --mat-slider-hover-state-layer-color: color-mix(in srgb, #{$primary-accent} 5%, transparent);
+  --mat-button-outlined-ripple-color: color-mix(in srgb, #{$primary-accent} 12%, transparent);
+  --mat-button-protected-ripple-color: color-mix(in srgb, #{$primary-accent} 12%, transparent);
+  --mat-button-text-ripple-color: color-mix(in srgb, #{$primary-accent} 12%, transparent);
+
+  // Surface overrides — M3 auto-derives a near-black neutral that's too dark.
+  --mat-paginator-container-background-color: #424242;
 
   // ── Severity palette ─────────────────────────────────────────────────────────
   // Single source of truth consumed by all component stylesheets via var(--sev-*)
@@ -129,7 +220,7 @@ body {
 
 ///mat-button routerLinkActive
 .active-link {
-  color: mat.m2-get-color-from-palette($accent) !important;
+  color: #69f0ae !important;
 }
 
 
@@ -286,7 +377,7 @@ pre.hljs code {
     text-align: left;
     width: 1%;
     color: #ccc;
-    border-right: 1px solid #16bf6e;
+    border-right: 1px solid #69f0ae;
   }
 }
 
@@ -383,6 +474,12 @@ blockquote p {
 // Let app-navbar control its own background via backdrop-filter
 mat-toolbar.app-navbar {
   --mat-toolbar-container-background-color: transparent;
+}
+
+// Match the form-field container to the transparent .poc-textarea-wrapper
+// (M3 dark theme otherwise paints a subtle surface tint behind the textarea).
+.mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
 }
 
 // ── Compact slate menu (aligns with .app-navbar toolbar look) ───
@@ -576,6 +673,32 @@ mat-toolbar.app-navbar {
       border-radius: 16px 16px 0 0 !important;
       width: 100% !important;
     }
+  }
+}
+
+// ── Ollama AI dialog — opt out of M3 560px container max-width ───────────────
+.ollama-dialog-panel {
+  --mat-dialog-container-max-width: none;
+
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-surface {
+    max-width: none !important;
+  }
+}
+
+// ── CVSS dialog — opt out of M3 560px container max-width ────────────────────
+.cvss-dialog-panel {
+  --mat-dialog-container-max-width: none;
+  --mat-dialog-container-small-max-width: none;
+  max-width: none !important;
+
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-inner-container,
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__container,
+  .mdc-dialog__surface {
+    max-width: none !important;
+    width: 100% !important;
   }
 }
 
