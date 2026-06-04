@@ -126,7 +126,9 @@ to \`/assets/vulns.json\`.
   openDialogCVSS(): void {
 
     const dialogRef = this.dialog.open(DialogCvssComponent, {
-      width: '700px',
+      width: '1100px',
+      maxWidth: '95vw',
+      panelClass: 'cvss-dialog-panel',
       disableClose: false,
       data: []
     });

@@ -325,11 +325,19 @@ $danger-border:   rgba(183, 28, 28, 0.3);
 }
 
 .section-menu-btn {
-  width: 28px;
-  height: 28px;
+  --mdc-icon-button-state-layer-size: 28px;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
   line-height: 28px;
   flex-shrink: 0;
   color: $icon;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  .mat-mdc-button-touch-target { height: 28px !important; width: 28px !important; }
+  .mat-icon { margin: 0; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
 
   &:hover { color: $text; }
 }
@@ -463,10 +471,18 @@ $danger-border:   rgba(183, 28, 28, 0.3);
 }
 
 .row-action-btn {
-  width: 28px;
-  height: 28px;
+  --mdc-icon-button-state-layer-size: 28px;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
   line-height: 28px;
   color: $icon;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  .mat-mdc-button-touch-target { height: 28px !important; width: 28px !important; }
+  .mat-icon { margin: 0; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
 
   &:hover { color: $text; }
 }

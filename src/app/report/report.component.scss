@@ -484,21 +484,21 @@ $rh-text-muted: rgba(255, 255, 255, 0.38);
 @keyframes rh-save-pulse {
   0% {
     box-shadow:
-      0 0 0 0 rgba(22, 191, 110, 0.55),
-      0 0 0 1px rgba(22, 191, 110, 0.55),
-      0 0 14px rgba(22, 191, 110, 0.35);
+      0 0 0 0 rgba(105, 240, 174, 0.55),
+      0 0 0 1px rgba(105, 240, 174, 0.55),
+      0 0 14px rgba(105, 240, 174, 0.35);
   }
   70% {
     box-shadow:
-      0 0 0 10px rgba(22, 191, 110, 0),
-      0 0 0 1px rgba(22, 191, 110, 0.35),
-      0 0 14px rgba(22, 191, 110, 0.18);
+      0 0 0 10px rgba(105, 240, 174, 0),
+      0 0 0 1px rgba(105, 240, 174, 0.35),
+      0 0 14px rgba(105, 240, 174, 0.18);
   }
   100% {
     box-shadow:
-      0 0 0 0 rgba(22, 191, 110, 0),
-      0 0 0 1px rgba(22, 191, 110, 0.35),
-      0 0 14px rgba(22, 191, 110, 0.18);
+      0 0 0 0 rgba(105, 240, 174, 0),
+      0 0 0 1px rgba(105, 240, 174, 0.35),
+      0 0 14px rgba(105, 240, 174, 0.18);
   }
 }
 
@@ -800,7 +800,7 @@ tr.mat-mdc-footer-row td {
 }
 
 ::ng-deep .legend-item:hover {
-  color: #16bf6e !important;
+  color: #69f0ae !important;
 }
 
 mat-paginator {
@@ -984,7 +984,7 @@ mat-paginator {
   font-size: 0.76rem !important;
   font-weight: 600 !important;
   letter-spacing: 0.015em;
-  box-shadow: 0 0 0 1px rgba(22, 191, 110, 0.35), 0 0 12px rgba(22, 191, 110, 0.18);
+  box-shadow: 0 0 0 1px rgba(105, 240, 174, 0.35), 0 0 12px rgba(105, 240, 174, 0.18);
 
   &__label {
     display: inline-flex;
@@ -2058,6 +2058,11 @@ mat-paginator {
   right: 4px;
 }
 
+.fullscreen-edit-btn {
+  --mdc-icon-button-icon-color: #{$accent-green};
+  color: $accent-green !important;
+}
+
 .issue-form-meta-col {
   display: flex;
   flex-direction: column;
@@ -2427,9 +2432,9 @@ mat-paginator {
   }
 
   &--active {
-    color: #16bf6e !important;
-    border-color: rgba(22, 191, 110, 0.45) !important;
-    background: rgba(22, 191, 110, 0.08) !important;
+    color: #69f0ae !important;
+    border-color: rgba(105, 240, 174, 0.45) !important;
+    background: rgba(105, 240, 174, 0.08) !important;
   }
 }
 
@@ -2502,7 +2507,7 @@ mat-paginator {
   outline: none;
   transition: border-color 0.2s ease;
 
-  &:focus { border-color: rgba(22, 191, 110, 0.6); }
+  &:focus { border-color: rgba(105, 240, 174, 0.6); }
 
   // hide native number spinners
   &::-webkit-outer-spin-button,

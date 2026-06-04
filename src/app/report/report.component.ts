@@ -1353,7 +1353,9 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
   openDialogCVSS(data: any): void {
 
     const dialogRef = this.dialog.open(DialogCvssComponent, {
-      width: '800px',
+      width: '1100px',
+      maxWidth: '95vw',
+      panelClass: 'cvss-dialog-panel',
       disableClose: false,
       data: data
     });
@@ -3915,7 +3917,9 @@ Info       | ${sevCounts.Info}\n\n`;
     const xxx = JSON.stringify(res);
 
     const dialogRef = this.dialog.open(DialogOllamaComponent, {
-      width: '800px',
+      width: '1040px',
+      maxWidth: '90vw',
+      panelClass: 'ollama-dialog-panel',
       disableClose: true,
       data: [{ "prompt": ``, "files": [{ "filename": this.report_info.report_name + ".json", "date": String(this.currentdateService.getcurrentDate()), "filetype": "json", "file": btoa(unescape(encodeURIComponent(xxx))) }], "images": [] }]
     });

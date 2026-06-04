@@ -238,7 +238,9 @@ export class AppComponent implements OnInit, OnDestroy {
   goAI(): void {
 
     const dialogRef = this.dialog.open(DialogOllamaComponent, {
-      width: '800px',
+      width: '1040px',
+      maxWidth: '90vw',
+      panelClass: 'ollama-dialog-panel',
       disableClose: true,
       data: []
     });
