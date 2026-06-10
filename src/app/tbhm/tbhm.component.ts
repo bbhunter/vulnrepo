@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAsvsResetComponent } from '../dialog-asvs-reset/dialog-asvs-reset.component';
 
@@ -26,6 +26,7 @@ type CheckedFilter = 'all' | 'checked' | 'unchecked';
   standalone: false,
   selector: 'app-tbhm',
   templateUrl: './tbhm.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./tbhm.component.scss']
 })
 export class TbhmComponent implements OnInit {

@@ -56,13 +56,13 @@
           @if (results?.published) {
             <div class="meta-card">
               <span class="meta-label">Published</span>
-              <span class="meta-value">{{ results?.published | date:'mediumDate' }}</span>
+              <span class="meta-value">{{ $safeNavigationMigration(results?.published) | date:'mediumDate' }}</span>
             </div>
           }
           @if (results?.modified) {
             <div class="meta-card">
               <span class="meta-label">Last Modified</span>
-              <span class="meta-value">{{ results?.modified | date:'mediumDate' }}</span>
+              <span class="meta-value">{{ $safeNavigationMigration(results?.modified) | date:'mediumDate' }}</span>
             </div>
           }
           @if (results?.assigner) {

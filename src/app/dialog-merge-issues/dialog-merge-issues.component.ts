@@ -9,6 +9,7 @@ import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/ma
   standalone: false,
   //imports: [],
   templateUrl: './dialog-merge-issues.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-merge-issues.component.scss'
 })
 export class DialogMergeIssuesComponent implements OnInit {

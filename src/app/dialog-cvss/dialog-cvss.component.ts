@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit  } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -92,6 +92,7 @@ function calcCVSS40Score(m: {AV: string, AC: string, AT: string, PR: string, UI:
   //imports: [],
   selector: 'app-dialog-cvss',
   templateUrl: './dialog-cvss.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-cvss.component.scss']
 })
 

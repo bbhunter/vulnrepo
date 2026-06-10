@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, Inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, Inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ApiService } from '../api.service';
 import { UntypedFormControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
   //imports: [],
   selector: 'app-dialog-cve',
   templateUrl: './dialog-cve.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-cve.component.scss']
 })
 

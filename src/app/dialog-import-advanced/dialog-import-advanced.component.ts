@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
 import { XMLParser } from 'fast-xml-parser';
@@ -27,6 +27,7 @@ interface OutputField {
   standalone: false,
   selector: 'app-dialog-import-advanced',
   templateUrl: './dialog-import-advanced.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-import-advanced.component.scss']
 })
 export class DialogImportAdvancedComponent implements OnInit {

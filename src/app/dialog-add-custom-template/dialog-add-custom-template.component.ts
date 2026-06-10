@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../utils.service';
 import { UntypedFormControl } from '@angular/forms';
@@ -16,6 +16,7 @@ export interface Tags {
   //imports: [],
   selector: 'app-dialog-add-custom-template',
   templateUrl: './dialog-add-custom-template.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-add-custom-template.component.scss'
 })
 export class DialogAddCustomTemplateComponent implements OnInit {

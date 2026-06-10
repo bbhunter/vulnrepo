@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {MatTableDataSource} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import { HttpClient } from '@angular/common/http';
@@ -18,6 +18,7 @@ export interface pcidssElement {
   //imports: [],
   selector: 'app-pcidss4',
   templateUrl: './pcidss4.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./pcidss4.component.scss']
 })
 export class Pcidss4Component implements OnInit {

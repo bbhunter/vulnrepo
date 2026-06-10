@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { trigger, state, style, transition, animate, keyframes } from '@angular/animations';
 import { IndexeddbService } from './indexeddb.service';
 import { Router, NavigationEnd } from '@angular/router';
@@ -18,6 +18,7 @@ import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [
     trigger('statusBadge', [
       state('encrypted', style({

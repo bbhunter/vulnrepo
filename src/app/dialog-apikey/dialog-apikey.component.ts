@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
 import { IndexeddbService } from '../indexeddb.service';
@@ -10,6 +10,7 @@ import { SessionstorageserviceService } from "../sessionstorageservice.service"
   //imports: [],
   selector: 'app-dialog-apikey',
   templateUrl: './dialog-apikey.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-apikey.component.scss']
 })
 export class DialogApikeyComponent implements OnInit {

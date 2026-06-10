@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 export interface FilterSyntaxExample {
@@ -11,6 +11,7 @@ export interface FilterSyntaxExample {
   standalone: false,
   selector: 'app-dialog-filter-help',
   templateUrl: './dialog-filter-help.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-filter-help.component.scss']
 })
 export class DialogFilterHelpComponent {

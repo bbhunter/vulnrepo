@@ -153,7 +153,7 @@
     <div class="adia-body source-body">
 
       <div class="source-header-card">
-        <img [src]="sourceMeta?.viewImg" [alt]="sourceMeta?.viewValue" class="source-header-img">
+        <img [src]="$safeNavigationMigration(sourceMeta?.viewImg)" [alt]="$safeNavigationMigration(sourceMeta?.viewValue)" class="source-header-img">
         <div class="source-header-text">
           <span class="source-header-name">{{ sourceMeta?.viewValue }}</span>
           <span class="source-header-fmt">{{ sourceMeta?.format }}</span>

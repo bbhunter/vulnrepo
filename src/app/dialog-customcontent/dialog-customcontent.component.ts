@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 
@@ -7,6 +7,7 @@ import { UntypedFormControl } from '@angular/forms';
   //imports: [],
   selector: 'app-dialog-customcontent',
   templateUrl: './dialog-customcontent.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-customcontent.component.scss']
 })
 export class DialogCustomcontentComponent implements OnInit {

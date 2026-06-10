@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -22,6 +22,7 @@ interface UnlockedReport {
   selector: 'app-dialog-asvs-export',
   templateUrl: './dialog-asvs-export.component.html',
   styleUrls: ['./dialog-asvs-export.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class DialogAsvsExportComponent implements OnInit {

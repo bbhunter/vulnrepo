@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UtilsService } from '../utils.service';
 import { UntypedFormControl } from '@angular/forms';
@@ -9,6 +9,7 @@ import { MatTooltip } from '@angular/material/tooltip';
   //imports: [],
   selector: 'app-dialog-encrypt-report',
   templateUrl: './dialog-encrypt-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-encrypt-report.component.scss'
 })
 export class DialogEncryptReportComponent implements OnInit {

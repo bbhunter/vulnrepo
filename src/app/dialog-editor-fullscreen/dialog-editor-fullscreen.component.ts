@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 
@@ -30,6 +30,7 @@ export interface TableCell {
   standalone: false,
   //imports: [],
   templateUrl: './dialog-editor-fullscreen.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-editor-fullscreen.component.scss'
 })
 export class DialogEditorFullscreenComponent implements OnInit {
