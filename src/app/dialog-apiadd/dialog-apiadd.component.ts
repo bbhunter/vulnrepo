@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ApiService } from '../api.service';
 import { IndexeddbService } from '../indexeddb.service';
@@ -16,6 +16,7 @@ interface Apisource {
   //imports: [],
   selector: 'app-dialog-apiadd',
   templateUrl: './dialog-apiadd.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-apiadd.component.scss']
 })
 export class DialogApiaddComponent implements OnInit {

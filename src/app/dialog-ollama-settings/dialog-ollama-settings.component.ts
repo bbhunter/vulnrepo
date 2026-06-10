@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 import {OllamaServiceService} from '../ollama-service.service';
@@ -10,6 +10,7 @@ import { IndexeddbService } from '../indexeddb.service';
   standalone: false,
   //imports: [],
   templateUrl: './dialog-ollama-settings.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-ollama-settings.component.scss'
 })
 export class DialogOllamaSettingsComponent {

@@ -91,7 +91,7 @@
           <span class="rh-meta-label">
             <mat-icon class="rh-meta-icon">calendar_today</mat-icon>Created
           </span>
-          <span class="rh-meta-value">{{reportdesc?.report_createdate | date:'mediumDate'}}</span>
+          <span class="rh-meta-value">{{$safeNavigationMigration(reportdesc?.report_createdate) | date:'mediumDate'}}</span>
         </div>
         }
         @if (decryptedReportDataChanged) {
@@ -153,7 +153,7 @@
           @if (!youhaveunsavedchanges && savemsg) {
           <span>{{savemsg}}</span><br>
           }
-          Last release: <b><i>{{reportdesc?.report_lastupdate | date:'medium'}}</i></b>
+          Last release: <b><i>{{$safeNavigationMigration(reportdesc?.report_lastupdate) | date:'medium'}}</i></b>
           }
           @if (lastsavereportdata !== '') {
           @if (!youhaveunsavedchanges && savemsg) {
@@ -989,7 +989,7 @@
                       <p>{{BBmsg}}<mat-progress-bar color="accent" mode="indeterminate"></mat-progress-bar></p>
                       }
                       @for (bounty of dec_data?.bounty; track bounty) {
-                      <button mat-stroked-button color="accent" (click)="redirectBounty(bounty?.url)"
+                      <button mat-stroked-button color="accent" (click)="redirectBounty($safeNavigationMigration(bounty?.url))"
                         title="{{bounty?.url}}">
                         <mat-icon>attach_money</mat-icon>{{bounty?.name}}
                       </button>

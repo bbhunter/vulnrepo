@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { IndexeddbService } from '../indexeddb.service';
 import { SeckeyValidatorService } from '../seckey-validator.service';
 import { ThemePalette } from '@angular/material/core';
@@ -19,6 +19,7 @@ import {Location} from '@angular/common';
   //imports: [],
   selector: 'app-newreport',
   templateUrl: './newreport.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./newreport.component.scss']
 })
 export class NewreportComponent implements OnInit {

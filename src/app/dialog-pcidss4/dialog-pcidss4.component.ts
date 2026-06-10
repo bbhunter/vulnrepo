@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -10,6 +10,7 @@ import { CryptoUtilsService } from '../crypto-utils.service';
   //imports: [],
   selector: 'app-dialog-pcidss4',
   templateUrl: './dialog-pcidss4.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-pcidss4.component.scss']
 })
 export class DialogPcidss4Component {

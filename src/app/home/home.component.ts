@@ -1,10 +1,11 @@
-import { Component, OnInit,signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { version } from "../../version";
 @Component({
   standalone: false,
   //imports: [],
   selector: 'app-home',
   templateUrl: './home.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {

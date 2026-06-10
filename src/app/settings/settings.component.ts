@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { IndexeddbService } from '../indexeddb.service';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
@@ -34,6 +34,7 @@ export interface ApiList {
   //imports: [],
   selector: 'app-settings',
   templateUrl: './settings.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./settings.component.scss']
 })
 

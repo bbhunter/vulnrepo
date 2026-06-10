@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
   //imports: [],
   selector: 'app-faq',
   templateUrl: './faq.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./faq.component.scss']
 })
 export class FaqComponent implements OnInit {

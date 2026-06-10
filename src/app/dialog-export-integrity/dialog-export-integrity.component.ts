@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -12,6 +12,7 @@ export interface ExportIntegrityData {
   standalone: false,
   selector: 'app-dialog-export-integrity',
   templateUrl: './dialog-export-integrity.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-export-integrity.component.scss']
 })
 export class DialogExportIntegrityComponent {

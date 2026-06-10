@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
@@ -6,6 +6,7 @@ import { MatDialogRef } from '@angular/material/dialog';
   //imports: [],
   selector: 'app-dialog-changekey',
   templateUrl: './dialog-changekey.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-changekey.component.scss']
 })
 export class DialogChangekeyComponent implements OnInit {

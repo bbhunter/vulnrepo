@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 import { CurrentdateService } from '../currentdate.service';
@@ -19,6 +19,7 @@ import { UtilsService } from '../utils.service';
   standalone: false,
   //imports: [],
   templateUrl: './dialog-ollama.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-ollama.component.scss']
 })
 export class DialogOllamaComponent implements OnInit {

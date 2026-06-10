@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { version } from "../../version";
 
@@ -7,6 +7,7 @@ import { version } from "../../version";
   //imports: [],
   selector: 'app-dialog-about',
   templateUrl: './dialog-about.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-about.component.scss']
 })
 export class DialogAboutComponent implements OnInit {

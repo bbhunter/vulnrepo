@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { UntypedFormControl } from '@angular/forms';
   //imports: [],
   selector: 'app-dialog-pass',
   templateUrl: './dialog-pass.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-pass.component.scss']
 })
 export class DialogPassComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UntypedFormControl } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -10,6 +10,7 @@ import { CryptoUtilsService } from '../crypto-utils.service';
   //imports: [],
   selector: 'app-dialog-asvs4',
   templateUrl: './dialog-asvs4.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-asvs4.component.scss']
 })
 export class DialogAsvs4Component implements OnInit {

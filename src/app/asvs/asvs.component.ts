@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -18,6 +18,7 @@ type CheckedFilter = 'all' | 'checked' | 'unchecked';
     selector: 'app-asvs',
     templateUrl: './asvs.component.html',
     styleUrls: ['./asvs.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AsvsComponent implements OnInit {

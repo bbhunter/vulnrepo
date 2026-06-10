@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import {MatTableDataSource} from '@angular/material/table';
 import { HttpClient } from '@angular/common/http';
 import {MatPaginator} from '@angular/material/paginator';
@@ -7,6 +7,7 @@ import {MatPaginator} from '@angular/material/paginator';
   selector: 'app-bb-list',
   standalone: false,
   templateUrl: './bb-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './bb-list.component.scss'
 })
 export class BbListComponent implements OnInit  {

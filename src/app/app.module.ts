@@ -41,7 +41,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { IndexeddbService } from './indexeddb.service';
 import { MatChipsModule } from '@angular/material/chips';
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { MatSelectModule } from '@angular/material/select';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { DatePipe } from '@angular/common';
@@ -57,7 +57,6 @@ import { DialogRemoveitemsComponent } from './dialog-removeitems/dialog-removeit
 import { MatMenuModule } from '@angular/material/menu';
 import { DialogCvssComponent } from './dialog-cvss/dialog-cvss.component';
 import { MatRadioModule } from '@angular/material/radio';
-import { HammerModule } from '@angular/platform-browser';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogCveComponent } from './dialog-cve/dialog-cve.component';
@@ -182,14 +181,13 @@ import { MatStepperModule } from '@angular/material/stepper';
         MatTabsModule,
         MatMenuModule,
         MatRadioModule,
-        HammerModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
         ClipboardModule,
         MatTooltipModule,
         MatSliderModule,
         MatStepperModule,
-        CdkAccordionModule], providers: [MessageService, IndexeddbService, DatePipe, provideHttpClient(withInterceptorsFromDi())] })
+        CdkAccordionModule], providers: [MessageService, IndexeddbService, DatePipe, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 
 export class AppModule {
   // Diagnostic only: inspect router configuration

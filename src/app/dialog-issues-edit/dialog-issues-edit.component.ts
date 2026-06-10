@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { UtilsService } from '../utils.service';
 
@@ -7,6 +7,7 @@ import { UtilsService } from '../utils.service';
   //imports: [],
   selector: 'app-dialog-issues-edit',
   templateUrl: './dialog-issues-edit.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-issues-edit.component.scss'
 })
 export class DialogIssuesEditComponent implements OnInit {

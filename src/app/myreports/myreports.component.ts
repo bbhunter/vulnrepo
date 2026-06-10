@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -42,6 +42,7 @@ export interface MyReportElement {
   standalone: false,
   selector: 'app-myreports',
   templateUrl: './myreports.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./myreports.component.scss']
 })
 export class MyreportsComponent implements OnInit, OnDestroy {

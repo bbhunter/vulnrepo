@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
 import { UntypedFormControl } from '@angular/forms';
@@ -55,6 +55,7 @@ export interface PCITesting {
   //imports: [],
   selector: 'app-dialog-addissue',
   templateUrl: './dialog-addissue.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-addissue.component.scss'],
 })
 export class DialogAddissueComponent implements OnInit, AfterViewInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CryptoUtilsService } from '../crypto-utils.service';
 import { UtilsService } from '../utils.service';
@@ -14,6 +14,7 @@ interface Exportsource {
   //imports: [],
   selector: 'app-dialog-exportissues',
   templateUrl: './dialog-exportissues.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-exportissues.component.scss']
 })
 export class DialogExportissuesComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, Inject, Optional } from '@angular/core';
+import { Component, Inject, Optional, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 interface ResetDialogData {
@@ -10,6 +10,7 @@ interface ResetDialogData {
   selector: 'app-dialog-asvs-reset',
   templateUrl: './dialog-asvs-reset.component.html',
   styleUrls: ['./dialog-asvs-reset.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class DialogAsvsResetComponent {

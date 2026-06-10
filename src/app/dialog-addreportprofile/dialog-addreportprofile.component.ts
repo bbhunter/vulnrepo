@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
@@ -12,6 +12,7 @@ import { DialogCustomcontentComponent } from '../dialog-customcontent/dialog-cus
   //imports: [],
   selector: 'app-dialog-addreportprofile',
   templateUrl: './dialog-addreportprofile.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dialog-addreportprofile.component.scss']
 })
 export class DialogAddreportprofileComponent implements OnInit {

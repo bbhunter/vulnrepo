@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { IndexeddbService } from '../indexeddb.service';
 import { Router } from '@angular/router';
 
@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
   //imports: [],
   selector: 'app-import-report',
   templateUrl: './import-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./import-report.component.scss']
 })
 export class ImportReportComponent implements OnInit {

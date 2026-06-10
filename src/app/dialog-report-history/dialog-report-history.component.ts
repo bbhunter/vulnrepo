@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { IndexeddbService } from '../indexeddb.service';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
   standalone: false,
   //imports: [],
   templateUrl: './dialog-report-history.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-report-history.component.scss'
 })
 export class DialogReportHistoryComponent implements OnInit {

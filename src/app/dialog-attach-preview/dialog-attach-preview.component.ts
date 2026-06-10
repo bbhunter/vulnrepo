@@ -1,4 +1,4 @@
-import { Component,Inject,OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
@@ -7,6 +7,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   standalone: false,
   //imports: [],
   templateUrl: './dialog-attach-preview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-attach-preview.component.scss'
 })
 export class DialogAttachPreviewComponent implements OnInit {
