@@ -3,7 +3,7 @@
 # VULNRΞPO - Vulnerability Report Generator & Repository
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.io/)
+[![Angular](https://img.shields.io/badge/Angular-22-red.svg)](https://angular.io/)
 [![Live App](https://img.shields.io/badge/live-vulnrepo.com-brightgreen)](https://vulnrepo.com/)
 [![Docker](https://img.shields.io/badge/docker-kac89%2Fvulnrepo-blue)](https://hub.docker.com/r/kac89/vulnrepo)
 
@@ -162,7 +162,7 @@ VULNRΞPO integrates with [Ollama](https://ollama.com) to provide AI-assisted re
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18 or later
-- [Angular CLI](https://angular.io/cli) 21:
+- [Angular CLI](https://angular.io/cli) 22:
   ```bash
   npm install -g @angular/cli
   ```

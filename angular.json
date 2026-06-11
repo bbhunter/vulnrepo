@@ -43,16 +43,9 @@
               "crypto-js",
               "js-sha256",
               "uuid",
-              "rxjs-compat/Subject",
-              "rxjs/Subject",
-              "rfdc",
               "buffer"
-           ],
+            ],
             "scripts": [],
-            "extractLicenses": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true,
             "browser": "src/main.ts",
             "webWorkerTsConfig": "src/tsconfig.worker.json"
           },
@@ -69,6 +62,7 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
+              "subresourceIntegrity": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -80,9 +74,15 @@
                   "maximumWarning": "6kb"
                 }
               ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           },
-          "defaultConfiguration": ""
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
@@ -92,8 +92,12 @@
           "configurations": {
             "production": {
               "buildTarget": "vulnrepo-app:build:production"
+            },
+            "development": {
+              "buildTarget": "vulnrepo-app:build:development"
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
@@ -124,25 +128,6 @@
               "src/site.webmanifest",
               "src/assets"
             ]
-          }
-        }
-      }
-    },
-    "vulnrepo-app-e2e": {
-      "root": "e2e/",
-      "projectType": "application",
-      "prefix": "",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "vulnrepo-app:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "vulnrepo-app:serve:production"
-            }
           }
         }
       }
