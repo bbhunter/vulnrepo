@@ -1,5 +1,6 @@
 import { Component, Inject, Optional, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import DOMPurify from 'dompurify';
 
 interface ResetDialogData {
   title?: string;
@@ -22,8 +23,9 @@ export class DialogAsvsResetComponent {
     @Optional() @Inject(MAT_DIALOG_DATA) data: ResetDialogData
   ) {
     this.title = data?.title || 'Reset ASVS checklist';
-    this.bodyHtml = data?.bodyHtml
+    const rawBody = data?.bodyHtml
       || 'All selected requirements <strong class="highlight">and notes</strong> will be removed from your local storage.';
+    this.bodyHtml = DOMPurify.sanitize(rawBody);
   }
 
   cancel(): void {
