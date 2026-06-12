@@ -1278,8 +1278,54 @@
           <div class="stats-panel">
             <div class="stats-panel-title">Researcher activity</div>
             <div class="stats-calendar-wrap">
-              <mat-calendar [dateClass]="dateClass()" [selected]="selectedRangeValue" [startAt]="startDate">
+              <mat-calendar [dateClass]="dateClass()" [selected]="selectedRangeValue" [startAt]="startDate"
+                (selectedChange)="onCalendarDayClick($event)">
               </mat-calendar>
+
+              <div class="act-legend" role="list" aria-label="Severity legend">
+                @for (sev of calendarSeverityOrder; track sev.key) {
+                <button type="button" class="act-legend-item" role="listitem"
+                  [class.is-active]="isIssueSeverityActive(sev.label)"
+                  (click)="toggleIssueSeverityToken(sev.label)"
+                  [title]="'Toggle ' + sev.label + ' filter'">
+                  <span class="act-legend-dot" [style.background]="'var(' + sev.cssVar + ')'"></span>
+                  <span class="act-legend-label">{{ sev.label }}</span>
+                </button>
+                }
+              </div>
+
+              @if (selectedActivityDay) {
+              <div class="act-day-card" role="status">
+                <div class="act-day-card__head">
+                  <div class="act-day-card__title">
+                    <mat-icon class="act-day-card__icon">event</mat-icon>
+                    <span>{{ selectedActivityDay.label }}</span>
+                  </div>
+                  <button type="button" mat-icon-button class="act-day-card__close"
+                    (click)="clearCalendarDayFilter()" title="Clear day filter">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                @if (selectedActivityDay.total > 0) {
+                <div class="act-day-card__total">
+                  <strong>{{ selectedActivityDay.total }}</strong>
+                  <span>finding{{ selectedActivityDay.total !== 1 ? 's' : '' }}</span>
+                </div>
+                <div class="act-day-card__breakdown">
+                  @for (sev of calendarSeverityOrder; track sev.key) {
+                  @if (selectedActivityDay[sev.key] > 0) {
+                  <span class="act-day-card__chip" [style.--chip-color]="'var(' + sev.cssVar + ')'">
+                    <span class="act-day-card__chip-dot"></span>
+                    {{ sev.label }}: <strong>{{ selectedActivityDay[sev.key] }}</strong>
+                  </span>
+                  }
+                  }
+                </div>
+                } @else {
+                <div class="act-day-card__empty">No findings recorded on this day.</div>
+                }
+              </div>
+              }
             </div>
           </div>
 

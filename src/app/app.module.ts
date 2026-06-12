@@ -26,7 +26,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ReportComponent } from './report/report.component';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_SCROLL_STRATEGY } from '@angular/material/dialog';
+import { Overlay } from '@angular/cdk/overlay';
 import { DialogPassComponent } from './dialog-pass/dialog-pass.component';
 import { MessageService } from './message.service';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -187,7 +188,11 @@ import { MatStepperModule } from '@angular/material/stepper';
         MatTooltipModule,
         MatSliderModule,
         MatStepperModule,
-        CdkAccordionModule], providers: [MessageService, IndexeddbService, DatePipe, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
+        CdkAccordionModule], providers: [MessageService, IndexeddbService, DatePipe, provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        // Dialog default scroll strategy: noop instead of block.
+        // Block adds `position: fixed; top: -scrollY` to <html>, which drags the
+        // sticky navbar off-screen each time a dialog opens.
+        { provide: MAT_DIALOG_SCROLL_STRATEGY, useFactory: (overlay: Overlay) => () => overlay.scrollStrategies.noop(), deps: [Overlay] }] })
 
 export class AppModule {
   // Diagnostic only: inspect router configuration

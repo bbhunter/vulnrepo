@@ -31,7 +31,7 @@ interface Token {
 }
 
 const FIELD_KEYS = new Set([
-  'severity', 'cvss', 'status', 'tag', 'title', 'poc', 'desc', 'has'
+  'severity', 'cvss', 'status', 'tag', 'title', 'poc', 'desc', 'has', 'date'
 ]);
 
 const STATUS_MAP: Record<string, number> = {
@@ -283,6 +283,11 @@ export class IssueFilterService {
     if (k === 'title' || k === 'poc' || k === 'desc') {
       return (v[k] ?? '').toLowerCase().includes(value.toLowerCase());
     }
+    if (k === 'date') {
+      const key = this.normalizeDateKey(v.date);
+      if (!key) return false;
+      return this.valueList(value).some(x => this.matchDateToken(key, x.trim()));
+    }
     if (k === 'has') {
       const w = value.toLowerCase();
       if (w === 'bounty')  return Array.isArray(v.bounty) ? v.bounty.length > 0 : !!v.bounty;
@@ -328,6 +333,29 @@ export class IssueFilterService {
   private stripQuotes(s: string): string {
     if (s.length >= 2 && s.startsWith('"') && s.endsWith('"')) return s.slice(1, -1);
     return s;
+  }
+
+  private normalizeDateKey(raw: any): string | null {
+    if (raw === undefined || raw === null || raw === '') return null;
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  private matchDateToken(key: string, token: string): boolean {
+    const t = this.stripQuotes(token);
+    const cmp = t.match(/^(>=|<=|>|<)(\d{4}-\d{2}-\d{2})$/);
+    if (cmp) {
+      switch (cmp[1]) {
+        case '>=': return key >= cmp[2];
+        case '<=': return key <= cmp[2];
+        case '>':  return key >  cmp[2];
+        case '<':  return key <  cmp[2];
+      }
+    }
+    const range = t.match(/^(\d{4}-\d{2}-\d{2})\.\.(\d{4}-\d{2}-\d{2})$/);
+    if (range) return key >= range[1] && key <= range[2];
+    return key === t;
   }
 }
 

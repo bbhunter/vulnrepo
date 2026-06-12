@@ -166,6 +166,17 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
   heatmapWeeks: { date: string, count: number, level: number }[][] = [];
   heatmapMonthLabels: { label: string, col: number }[] = [];
+
+  // Per-day activity cache (key: YYYY-MM-DD) used by mat-calendar dateClass and the selected-day card.
+  dayActivityMap: Map<string, { c: number, h: number, m: number, l: number, i: number, total: number }> = new Map();
+  selectedActivityDay: { key: string, label: string, c: number, h: number, m: number, l: number, i: number, total: number } | null = null;
+  readonly calendarSeverityOrder: { key: 'c' | 'h' | 'm' | 'l' | 'i', label: string, cssVar: string }[] = [
+    { key: 'c', label: 'Critical', cssVar: '--sev-critical' },
+    { key: 'h', label: 'High',     cssVar: '--sev-high' },
+    { key: 'm', label: 'Medium',   cssVar: '--sev-medium' },
+    { key: 'l', label: 'Low',      cssVar: '--sev-low' },
+    { key: 'i', label: 'Info',     cssVar: '--sev-info' },
+  ];
   selectedtheme = 'white';
   uploadlogoprev = '';
   adv_html: any;
@@ -843,7 +854,102 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
       this.calendar.updateTodaysDate(); // update calendar state
     }
 
+    this.rebuildDayActivityMap();
+    this.refreshSelectedActivityDay();
     this.buildHeatmap();
+  }
+
+  private rebuildDayActivityMap() {
+    const map = new Map<string, { c: number, h: number, m: number, l: number, i: number, total: number }>();
+    const vulns: any[] = this.decryptedReportDataChanged?.report_vulns ?? [];
+    for (const v of vulns) {
+      if (!v?.date) continue;
+      const d = new Date(v.date);
+      if (isNaN(d.getTime())) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      let entry = map.get(key);
+      if (!entry) {
+        entry = { c: 0, h: 0, m: 0, l: 0, i: 0, total: 0 };
+        map.set(key, entry);
+      }
+      switch (v.severity) {
+        case 'Critical': entry.c++; break;
+        case 'High':     entry.h++; break;
+        case 'Medium':   entry.m++; break;
+        case 'Low':      entry.l++; break;
+        case 'Info':     entry.i++; break;
+      }
+      entry.total++;
+    }
+    this.dayActivityMap = map;
+  }
+
+  private dateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private inTestWindow(date: Date): boolean {
+    const meta = this.decryptedReportDataChanged?.report_metadata;
+    if (!meta) return false;
+    const start = meta.starttest ? new Date(meta.starttest) : null;
+    const end   = meta.endtest   ? new Date(meta.endtest)   : null;
+    if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) return false;
+    const dKey = this.dateKey(date);
+    const sKey = this.dateKey(start);
+    const eKey = this.dateKey(end);
+    const lo = sKey <= eKey ? sKey : eKey;
+    const hi = sKey <= eKey ? eKey : sKey;
+    return dKey >= lo && dKey <= hi;
+  }
+
+  refreshSelectedActivityDay() {
+    if (!this.selectedActivityDay) return;
+    const e = this.dayActivityMap.get(this.selectedActivityDay.key);
+    if (!e) {
+      this.selectedActivityDay = { ...this.selectedActivityDay, c: 0, h: 0, m: 0, l: 0, i: 0, total: 0 };
+      return;
+    }
+    this.selectedActivityDay = { ...this.selectedActivityDay, ...e };
+  }
+
+  onCalendarDayClick(date: Date | null) {
+    if (!date) return;
+    const key = this.dateKey(date);
+    const entry = this.dayActivityMap.get(key) ?? { c: 0, h: 0, m: 0, l: 0, i: 0, total: 0 };
+    let label = key;
+    try {
+      label = date.toLocaleDateString(this.setLocal, { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      label = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    const already = this.selectedActivityDay?.key === key;
+    if (already) {
+      this.clearCalendarDayFilter();
+      return;
+    }
+    this.selectedActivityDay = { key, label, ...entry };
+    this.issueFilterQuery = this.issueFilterService.toggleFieldToken(
+      this.stripDateTokens(this.issueFilterQuery), 'date', key,
+    );
+    this.applyIssueFilter();
+    setTimeout(() => {
+      const el = document.querySelector('.report-issue-filter-bar');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
+  clearCalendarDayFilter() {
+    this.selectedActivityDay = null;
+    this.issueFilterQuery = this.stripDateTokens(this.issueFilterQuery);
+    this.applyIssueFilter();
+  }
+
+  private stripDateTokens(query: string): string {
+    return (query ?? '')
+      .split(' ')
+      .filter(t => !/^-?date:/i.test(t))
+      .join(' ')
+      .trim();
   }
 
   onDateChangeReportstart(event) {
@@ -874,111 +980,29 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   dateClass() {
     return (date: Date): MatCalendarCellCssClasses => {
-      const issuearr_success: string[] = [];
-      const issuearr_critical: string[] = [];
-      const issuearr_high: string[] = [];
-      const issuearr_medium: string[] = [];
-      const issuearr_low: string[] = [];
-      const issuearr_info: string[] = [];
+      const key = this.dateKey(date);
+      const entry = this.dayActivityMap.get(key);
+      const classes: string[] = [];
 
-      const critical = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Critical');
-      });
+      if (this.inTestWindow(date)) classes.push('act-window');
+      if (this.selectedActivityDay?.key === key) classes.push('act-picked');
 
-      const high = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'High');
-      });
+      if (!entry || entry.total === 0) return classes.length ? classes : '';
 
-      const medium = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Medium');
-      });
+      classes.push('act');
+      if (entry.c > 0) classes.push('has-c');
+      if (entry.h > 0) classes.push('has-h');
+      if (entry.m > 0) classes.push('has-m');
+      if (entry.l > 0) classes.push('has-l');
+      if (entry.i > 0) classes.push('has-i');
 
-      const low = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Low');
-      });
+      if (entry.total === 1)      classes.push('act-q1');
+      else if (entry.total <= 3)  classes.push('act-q2');
+      else if (entry.total <= 6)  classes.push('act-q3');
+      else                        classes.push('act-q4');
 
-      const info = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Info');
-      });
-
-      critical.forEach((item, index) => {
-        if (issuearr_critical.indexOf(item) === -1) {
-          issuearr_critical.push(item.date);
-        }
-      });
-
-      high.forEach((item, index) => {
-        if (issuearr_high.indexOf(item) === -1) {
-          issuearr_high.push(item.date);
-        }
-      });
-
-      medium.forEach((item, index) => {
-        if (issuearr_medium.indexOf(item) === -1) {
-          issuearr_medium.push(item.date);
-        }
-      });
-
-      low.forEach((item, index) => {
-        if (issuearr_low.indexOf(item) === -1) {
-          issuearr_low.push(item.date);
-        }
-      });
-
-      info.forEach((item, index) => {
-        if (issuearr_info.indexOf(item) === -1) {
-          issuearr_info.push(item.date);
-        }
-      });
-
-      // this.decryptedReportDataChanged.report_vulns.forEach((item, index) => {
-      //   if (issuearr_success.indexOf(item) === -1) {
-      //     issuearr_success.push(item.date);
-      //   }
-      // });
-
-      const successdate = issuearr_success
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdate = issuearr_critical
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdatehigh = issuearr_high
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdatemedium = issuearr_medium
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdatelow = issuearr_low
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdateinfo = issuearr_info
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      if (specialdate) {
-        return 'special-date'
-      } else if (successdate) {
-        return 'success-date'
-      } else if (specialdatehigh) {
-        return 'special-date-high'
-      } else if (specialdatemedium) {
-        return 'special-date-medium'
-      } else if (specialdatelow) {
-        return 'special-date-low'
-      } else if (specialdateinfo) {
-        return 'special-date-info'
-      } else {
-        return ''
-      }
-
+      return classes;
     };
-
   }
 
   getReportProfiles() {
