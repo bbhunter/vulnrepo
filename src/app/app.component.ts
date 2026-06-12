@@ -117,7 +117,12 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     this.getunsavedchang = this.indexeddbService.getchangesStatus().subscribe(value => {
-      this.status_unsaved = value;
+      // Defer to next microtask: emitters can fire synchronously from a child
+      // component's event handler during change detection (e.g. report editors
+      // calling sureYouWanttoLeave()). Writing here in-pass would race the
+      // parent's [class.has-unsaved] binding and throw
+      // ExpressionChangedAfterItHasBeenCheckedError.
+      queueMicrotask(() => { this.status_unsaved = value; });
     });
   }
 

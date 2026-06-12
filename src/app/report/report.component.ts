@@ -164,8 +164,28 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
     { status: 'Fixed', value: 0, color: '#69f0ae' },
     { status: "Won't Fix", value: 0, color: '#616161' },
   ];
-  heatmapWeeks: { date: string, count: number, level: number }[][] = [];
+  heatmapWeeks: { date: string, total: number, top: 'c'|'h'|'m'|'l'|'i'|null, q: 0|1|2|3|4, inRange: boolean, inWindow: boolean }[][] = [];
   heatmapMonthLabels: { label: string, col: number }[] = [];
+  heatmapRangeMode: 'window' | '12w' | 'all' = 'window';
+  readonly heatmapRangeOptions: { mode: 'window' | '12w' | 'all', label: string }[] = [
+    { mode: 'window', label: 'Test window' },
+    { mode: '12w',    label: '12 weeks' },
+    { mode: 'all',    label: 'All-time' },
+  ];
+  heatmapStats: { total: number, activeDays: number, peakLabel: string, peakCount: number, longestStreak: number, avgPerActive: number } = {
+    total: 0, activeDays: 0, peakLabel: '', peakCount: 0, longestStreak: 0, avgPerActive: 0,
+  };
+
+  // Per-day activity cache (key: YYYY-MM-DD) used by mat-calendar dateClass and the selected-day card.
+  dayActivityMap: Map<string, { c: number, h: number, m: number, l: number, i: number, total: number }> = new Map();
+  selectedActivityDay: { key: string, label: string, c: number, h: number, m: number, l: number, i: number, total: number } | null = null;
+  readonly calendarSeverityOrder: { key: 'c' | 'h' | 'm' | 'l' | 'i', label: string, cssVar: string }[] = [
+    { key: 'c', label: 'Critical', cssVar: '--sev-critical' },
+    { key: 'h', label: 'High',     cssVar: '--sev-high' },
+    { key: 'm', label: 'Medium',   cssVar: '--sev-medium' },
+    { key: 'l', label: 'Low',      cssVar: '--sev-low' },
+    { key: 'i', label: 'Info',     cssVar: '--sev-info' },
+  ];
   selectedtheme = 'white';
   uploadlogoprev = '';
   adv_html: any;
@@ -246,6 +266,10 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isIssueSeverityActive(severity: string): boolean {
     return this.issueFilterService.hasFieldToken(this.issueFilterQuery, 'severity', severity);
+  }
+
+  get hasAnySeverityFilter(): boolean {
+    return this.issueFilterSeverities.some(sev => this.isIssueSeverityActive(sev));
   }
 
   clearIssueFilter() {
@@ -843,7 +867,102 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
       this.calendar.updateTodaysDate(); // update calendar state
     }
 
+    this.rebuildDayActivityMap();
+    this.refreshSelectedActivityDay();
     this.buildHeatmap();
+  }
+
+  private rebuildDayActivityMap() {
+    const map = new Map<string, { c: number, h: number, m: number, l: number, i: number, total: number }>();
+    const vulns: any[] = this.decryptedReportDataChanged?.report_vulns ?? [];
+    for (const v of vulns) {
+      if (!v?.date) continue;
+      const d = new Date(v.date);
+      if (isNaN(d.getTime())) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      let entry = map.get(key);
+      if (!entry) {
+        entry = { c: 0, h: 0, m: 0, l: 0, i: 0, total: 0 };
+        map.set(key, entry);
+      }
+      switch (v.severity) {
+        case 'Critical': entry.c++; break;
+        case 'High':     entry.h++; break;
+        case 'Medium':   entry.m++; break;
+        case 'Low':      entry.l++; break;
+        case 'Info':     entry.i++; break;
+      }
+      entry.total++;
+    }
+    this.dayActivityMap = map;
+  }
+
+  private dateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private inTestWindow(date: Date): boolean {
+    const meta = this.decryptedReportDataChanged?.report_metadata;
+    if (!meta) return false;
+    const start = meta.starttest ? new Date(meta.starttest) : null;
+    const end   = meta.endtest   ? new Date(meta.endtest)   : null;
+    if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) return false;
+    const dKey = this.dateKey(date);
+    const sKey = this.dateKey(start);
+    const eKey = this.dateKey(end);
+    const lo = sKey <= eKey ? sKey : eKey;
+    const hi = sKey <= eKey ? eKey : sKey;
+    return dKey >= lo && dKey <= hi;
+  }
+
+  refreshSelectedActivityDay() {
+    if (!this.selectedActivityDay) return;
+    const e = this.dayActivityMap.get(this.selectedActivityDay.key);
+    if (!e) {
+      this.selectedActivityDay = { ...this.selectedActivityDay, c: 0, h: 0, m: 0, l: 0, i: 0, total: 0 };
+      return;
+    }
+    this.selectedActivityDay = { ...this.selectedActivityDay, ...e };
+  }
+
+  onCalendarDayClick(date: Date | null) {
+    if (!date) return;
+    const key = this.dateKey(date);
+    const entry = this.dayActivityMap.get(key) ?? { c: 0, h: 0, m: 0, l: 0, i: 0, total: 0 };
+    let label = key;
+    try {
+      label = date.toLocaleDateString(this.setLocal, { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      label = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    const already = this.selectedActivityDay?.key === key;
+    if (already) {
+      this.clearCalendarDayFilter();
+      return;
+    }
+    this.selectedActivityDay = { key, label, ...entry };
+    this.issueFilterQuery = this.issueFilterService.toggleFieldToken(
+      this.stripDateTokens(this.issueFilterQuery), 'date', key,
+    );
+    this.applyIssueFilter();
+    setTimeout(() => {
+      const el = document.querySelector('.report-issue-filter-bar');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
+  clearCalendarDayFilter() {
+    this.selectedActivityDay = null;
+    this.issueFilterQuery = this.stripDateTokens(this.issueFilterQuery);
+    this.applyIssueFilter();
+  }
+
+  private stripDateTokens(query: string): string {
+    return (query ?? '')
+      .split(' ')
+      .filter(t => !/^-?date:/i.test(t))
+      .join(' ')
+      .trim();
   }
 
   onDateChangeReportstart(event) {
@@ -874,111 +993,29 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   dateClass() {
     return (date: Date): MatCalendarCellCssClasses => {
-      const issuearr_success: string[] = [];
-      const issuearr_critical: string[] = [];
-      const issuearr_high: string[] = [];
-      const issuearr_medium: string[] = [];
-      const issuearr_low: string[] = [];
-      const issuearr_info: string[] = [];
+      const key = this.dateKey(date);
+      const entry = this.dayActivityMap.get(key);
+      const classes: string[] = [];
 
-      const critical = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Critical');
-      });
+      if (this.inTestWindow(date)) classes.push('act-window');
+      if (this.selectedActivityDay?.key === key) classes.push('act-picked');
 
-      const high = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'High');
-      });
+      if (!entry || entry.total === 0) return classes.length ? classes : '';
 
-      const medium = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Medium');
-      });
+      classes.push('act');
+      if (entry.c > 0) classes.push('has-c');
+      if (entry.h > 0) classes.push('has-h');
+      if (entry.m > 0) classes.push('has-m');
+      if (entry.l > 0) classes.push('has-l');
+      if (entry.i > 0) classes.push('has-i');
 
-      const low = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Low');
-      });
+      if (entry.total === 1)      classes.push('act-q1');
+      else if (entry.total <= 3)  classes.push('act-q2');
+      else if (entry.total <= 6)  classes.push('act-q3');
+      else                        classes.push('act-q4');
 
-      const info = this.decryptedReportDataChanged.report_vulns.filter(function (el) {
-        return (el.severity === 'Info');
-      });
-
-      critical.forEach((item, index) => {
-        if (issuearr_critical.indexOf(item) === -1) {
-          issuearr_critical.push(item.date);
-        }
-      });
-
-      high.forEach((item, index) => {
-        if (issuearr_high.indexOf(item) === -1) {
-          issuearr_high.push(item.date);
-        }
-      });
-
-      medium.forEach((item, index) => {
-        if (issuearr_medium.indexOf(item) === -1) {
-          issuearr_medium.push(item.date);
-        }
-      });
-
-      low.forEach((item, index) => {
-        if (issuearr_low.indexOf(item) === -1) {
-          issuearr_low.push(item.date);
-        }
-      });
-
-      info.forEach((item, index) => {
-        if (issuearr_info.indexOf(item) === -1) {
-          issuearr_info.push(item.date);
-        }
-      });
-
-      // this.decryptedReportDataChanged.report_vulns.forEach((item, index) => {
-      //   if (issuearr_success.indexOf(item) === -1) {
-      //     issuearr_success.push(item.date);
-      //   }
-      // });
-
-      const successdate = issuearr_success
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdate = issuearr_critical
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdatehigh = issuearr_high
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdatemedium = issuearr_medium
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdatelow = issuearr_low
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      const specialdateinfo = issuearr_info
-        .map(strDate => new Date(strDate))
-        .some(d => d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear());
-
-      if (specialdate) {
-        return 'special-date'
-      } else if (successdate) {
-        return 'success-date'
-      } else if (specialdatehigh) {
-        return 'special-date-high'
-      } else if (specialdatemedium) {
-        return 'special-date-medium'
-      } else if (specialdatelow) {
-        return 'special-date-low'
-      } else if (specialdateinfo) {
-        return 'special-date-info'
-      } else {
-        return ''
-      }
-
+      return classes;
     };
-
   }
 
   getReportProfiles() {
@@ -1554,68 +1591,170 @@ Sample code here\n\
 
   }
 
-  buildHeatmap() {
-    const meta = this.decryptedReportDataChanged.report_metadata;
-    const vulns = this.decryptedReportDataChanged.report_vulns;
+  setHeatmapRange(mode: 'window' | '12w' | 'all') {
+    if (this.heatmapRangeMode === mode) return;
+    this.heatmapRangeMode = mode;
+    this.buildHeatmap();
+  }
 
+  onHeatmapCellClick(cell: { date: string, inRange: boolean }) {
+    if (!cell?.inRange) return;
+    this.onCalendarDayClick(new Date(cell.date));
+  }
+
+  isHeatmapCellPicked(cell: { date: string }): boolean {
+    return this.selectedActivityDay?.key === cell.date;
+  }
+
+  heatmapCellTitle(cell: { date: string, total: number, inRange: boolean }): string {
+    if (!cell.inRange) return '';
+    if (cell.total === 0) return `No findings on ${cell.date}`;
+    const e = this.dayActivityMap.get(cell.date);
+    const parts: string[] = [];
+    if (e) {
+      for (const sev of this.calendarSeverityOrder) {
+        const v = e[sev.key];
+        if (v > 0) parts.push(`${v} ${sev.label}`);
+      }
+    }
+    const breakdown = parts.length ? ` (${parts.join(', ')})` : '';
+    return `${cell.date} — ${cell.total} finding${cell.total !== 1 ? 's' : ''}${breakdown}`;
+  }
+
+  get heatmapWindowLabel(): string {
+    const meta = this.decryptedReportDataChanged?.report_metadata;
+    if (!meta?.starttest || !meta?.endtest) return '';
+    const s = new Date(meta.starttest);
+    const e = new Date(meta.endtest);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return '';
+    return `${this.formatShortDate(this.dateKey(s))} – ${this.formatShortDate(this.dateKey(e))}`;
+  }
+
+  private formatShortDate(key: string): string {
+    const d = new Date(key);
+    if (isNaN(d.getTime())) return key;
+    try {
+      return d.toLocaleDateString(this.setLocal, { month: 'short', day: 'numeric' });
+    } catch {
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+  }
+
+  private getHeatmapRange(): { startNorm: Date, endNorm: Date, winStart: Date | null, winEnd: Date | null } {
+    const meta = this.decryptedReportDataChanged?.report_metadata ?? {};
     const today = new Date();
     const todayNorm = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    let endNorm: Date;
+    const winStart = meta.starttest ? this.normDate(new Date(meta.starttest)) : null;
+    const winEnd   = meta.endtest   ? this.normDate(new Date(meta.endtest))   : null;
+
     let startNorm: Date;
+    let endNorm: Date;
 
-    if (meta.endtest) {
-      const d = new Date(meta.endtest);
-      endNorm = isNaN(d.getTime()) ? todayNorm : new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    } else {
-      endNorm = todayNorm;
-    }
-
-    if (meta.starttest) {
-      const d = new Date(meta.starttest);
-      startNorm = isNaN(d.getTime()) ? new Date(endNorm.getTime() - 29 * 86400000) : new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    } else {
-      startNorm = new Date(endNorm.getTime() - 29 * 86400000);
-    }
-
-    // Count issues per day
-    const countMap: { [key: string]: number } = {};
-    vulns.forEach(v => {
-      if (v.date) {
-        const d = new Date(v.date);
-        if (!isNaN(d.getTime())) {
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-          countMap[key] = (countMap[key] || 0) + 1;
-        }
+    if (this.heatmapRangeMode === '12w') {
+      endNorm = winEnd && winEnd > todayNorm ? winEnd : todayNorm;
+      startNorm = new Date(endNorm.getFullYear(), endNorm.getMonth(), endNorm.getDate() - (12 * 7 - 1));
+    } else if (this.heatmapRangeMode === 'all') {
+      const stamps: number[] = [];
+      for (const k of this.dayActivityMap.keys()) {
+        const d = new Date(k);
+        if (!isNaN(d.getTime())) stamps.push(d.getTime());
       }
-    });
+      if (winStart) stamps.push(winStart.getTime());
+      if (winEnd)   stamps.push(winEnd.getTime());
+      stamps.push(todayNorm.getTime());
+      const minS = Math.min(...stamps);
+      const maxS = Math.max(...stamps);
+      startNorm = new Date(minS);
+      endNorm   = new Date(maxS);
+    } else {
+      endNorm   = winEnd ?? todayNorm;
+      startNorm = winStart ?? new Date(endNorm.getFullYear(), endNorm.getMonth(), endNorm.getDate() - 29);
+    }
 
-    const rangeValues = Object.entries(countMap)
-      .filter(([k]) => { const d = new Date(k); return d >= startNorm && d <= endNorm; })
-      .map(([, v]) => v);
-    const rangeMax = rangeValues.length ? Math.max(...rangeValues) : 1;
+    return { startNorm, endNorm, winStart, winEnd };
+  }
 
-    // Build week columns starting from the Sunday of the week containing startNorm
+  private normDate(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  buildHeatmap() {
+    if (!this.dayActivityMap || this.dayActivityMap.size === 0 && !this.decryptedReportDataChanged?.report_metadata) {
+      this.heatmapWeeks = [];
+      this.heatmapMonthLabels = [];
+      this.heatmapStats = { total: 0, activeDays: 0, peakLabel: '', peakCount: 0, longestStreak: 0, avgPerActive: 0 };
+      return;
+    }
+
+    const { startNorm, endNorm, winStart, winEnd } = this.getHeatmapRange();
+    const sevOrder: ('c'|'h'|'m'|'l'|'i')[] = ['c', 'h', 'm', 'l', 'i'];
+
+    // Compute saturation reference: max daily total inside the visible range.
+    let rangeMax = 0;
+    for (const [key, entry] of this.dayActivityMap.entries()) {
+      const d = new Date(key);
+      if (d >= startNorm && d <= endNorm) rangeMax = Math.max(rangeMax, entry.total);
+    }
+    if (rangeMax === 0) rangeMax = 1;
+
+    // Stat accumulators
+    let total = 0;
+    let activeDays = 0;
+    let peakKey = '';
+    let peakCount = 0;
+    let currentStreak = 0;
+    let longestStreak = 0;
+
+    // Build week columns starting from the Sunday of the week containing startNorm.
     const gridStart = new Date(startNorm);
     gridStart.setDate(gridStart.getDate() - gridStart.getDay());
 
-    const weeks: { date: string, count: number, level: number }[][] = [];
+    const weeks: typeof this.heatmapWeeks = [];
     const monthLabels: { label: string, col: number }[] = [];
     let lastMonth = -1;
     const cur = new Date(gridStart);
 
     while (cur <= endNorm) {
-      const week: { date: string, count: number, level: number }[] = [];
+      const week: typeof this.heatmapWeeks[0] = [];
       for (let d = 0; d < 7; d++) {
         const inRange = cur >= startNorm && cur <= endNorm;
-        const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
-        const count = inRange ? (countMap[key] || 0) : 0;
-        const level = !inRange ? -1 : count === 0 ? 0 : Math.ceil((count / rangeMax) * 4);
-        week.push({ date: key, count, level });
+        const key = this.dateKey(cur);
+        const entry = inRange ? this.dayActivityMap.get(key) : undefined;
+        const count = entry?.total ?? 0;
+        const inWindow = !!winStart && !!winEnd && cur >= winStart && cur <= winEnd;
+
+        let top: 'c'|'h'|'m'|'l'|'i' | null = null;
+        if (entry) {
+          for (const s of sevOrder) {
+            if (entry[s] > 0) { top = s; break; }
+          }
+        }
+
+        let q: 0|1|2|3|4 = 0;
+        if (count > 0) {
+          const ratio = count / rangeMax;
+          q = ratio >= 0.75 ? 4 : ratio >= 0.5 ? 3 : ratio >= 0.25 ? 2 : 1;
+        }
+
+        week.push({ date: key, total: count, top, q, inRange, inWindow });
+
+        if (inRange) {
+          total += count;
+          if (count > 0) {
+            activeDays++;
+            currentStreak++;
+            if (currentStreak > longestStreak) longestStreak = currentStreak;
+            if (count > peakCount) { peakCount = count; peakKey = key; }
+          } else {
+            currentStreak = 0;
+          }
+        }
+
         cur.setDate(cur.getDate() + 1);
       }
 
-      const firstInRange = week.find(d => d.level !== -1);
+      const firstInRange = week.find(d => d.inRange);
       if (firstInRange) {
         const m = new Date(firstInRange.date).getMonth();
         if (m !== lastMonth) {
@@ -1629,6 +1768,14 @@ Sample code here\n\
 
     this.heatmapWeeks = weeks;
     this.heatmapMonthLabels = monthLabels;
+    this.heatmapStats = {
+      total,
+      activeDays,
+      peakLabel: peakKey ? this.formatShortDate(peakKey) : '',
+      peakCount,
+      longestStreak,
+      avgPerActive: activeDays > 0 ? Math.round((total / activeDays) * 10) / 10 : 0,
+    };
   }
 
   getData(event?: PageEvent) {
@@ -2408,6 +2555,7 @@ Sample code here\n\
     const dialogRef = this.dialog.open(DialogEditComponent, {
       width: '420px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       panelClass: 'edit-dialog-panel',
       data: [{ remo }, { item }],
     });

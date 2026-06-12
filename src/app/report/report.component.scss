@@ -834,53 +834,67 @@ tr.mat-mdc-footer-row td {
   border-top: 1px solid #595959;
 }
 
-::ng-deep .special-date {
-  border-color: var(--sev-critical) !important;
-  background-color: var(--sev-critical) !important;
-  opacity: 0.6;
-  border-radius: 100%;
-  border-width: 0px;
+// ── Researcher activity calendar — per-day severity dots ─────────
+// `dateClass` emits classes on the `<td>`: `act`, `act-window`, `act-picked`,
+// `has-c|h|m|l|i` (one per severity present), and `act-q1..q4` (count bucket).
+// Each `has-*` sets a CSS variable holding that severity's color; the cell
+// renders up to 5 colored dots in a row via a single `::after` gradient.
+::ng-deep .mat-calendar-body-cell {
+  &.act-window .mat-calendar-body-cell-content {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+  }
+  &.act .mat-calendar-body-cell-content {
+    --dot-c: transparent;
+    --dot-h: transparent;
+    --dot-m: transparent;
+    --dot-l: transparent;
+    --dot-i: transparent;
+    position: relative;
+    border-radius: 8px;
+    overflow: visible;
+  }
+  &.has-c .mat-calendar-body-cell-content { --dot-c: var(--sev-critical); }
+  &.has-h .mat-calendar-body-cell-content { --dot-h: var(--sev-high); }
+  &.has-m .mat-calendar-body-cell-content { --dot-m: var(--sev-medium); }
+  &.has-l .mat-calendar-body-cell-content { --dot-l: var(--sev-low); }
+  &.has-i .mat-calendar-body-cell-content { --dot-i: var(--sev-info); }
+
+  &.act .mat-calendar-body-cell-content::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 4px;
+    border-radius: 2px;
+    background-image:
+      radial-gradient(circle at 10% 50%, var(--dot-c) 0 1.6px, transparent 1.6px),
+      radial-gradient(circle at 30% 50%, var(--dot-h) 0 1.6px, transparent 1.6px),
+      radial-gradient(circle at 50% 50%, var(--dot-m) 0 1.6px, transparent 1.6px),
+      radial-gradient(circle at 70% 50%, var(--dot-l) 0 1.6px, transparent 1.6px),
+      radial-gradient(circle at 90% 50%, var(--dot-i) 0 1.6px, transparent 1.6px);
+    pointer-events: none;
+  }
+
+  // Density bucket: tint the cell to make heavy days "louder".
+  &.act-q2 .mat-calendar-body-cell-content { background-color: rgba(255, 255, 255, 0.07); }
+  &.act-q3 .mat-calendar-body-cell-content { background-color: rgba(255, 255, 255, 0.11); }
+  &.act-q4 .mat-calendar-body-cell-content { background-color: rgba(255, 255, 255, 0.16); }
+
+  // User-picked day filtering the issue table.
+  &.act-picked .mat-calendar-body-cell-content {
+    outline: 2px solid var(--sev-info);
+    outline-offset: -2px;
+    background-color: rgba(39, 128, 227, 0.18);
+  }
 }
 
-::ng-deep .special-date-high {
-  border-color: var(--sev-high) !important;
-  background-color: var(--sev-high) !important;
-  opacity: 0.6;
-  border-radius: 100%;
-  border-width: 0px;
-}
-
-::ng-deep .special-date-medium {
-  border-color: var(--sev-medium) !important;
-  background-color: var(--sev-medium) !important;
-  opacity: 0.6;
-  color: #000 !important;
-  border-radius: 100%;
-  border-width: 0px;
-}
-
-::ng-deep .special-date-low {
-  border-color: var(--sev-low) !important;
-  background-color: var(--sev-low) !important;
-  opacity: 0.6;
-  border-radius: 100%;
-  border-width: 0px;
-}
-
-::ng-deep .special-date-info {
-  border-color: var(--sev-info) !important;
-  background-color: var(--sev-info) !important;
-  opacity: 0.6;
-  border-radius: 100%;
-  border-width: 0px;
-}
-
-::ng-deep .success-date {
-  border-color: #18ad3d58 !important;
-  background-color: #18ad3d58 !important;
-  opacity: 0.6;
-  border-radius: 100%;
-  border-width: 0px;
+// Replace Material's heavy "today" fill with a subtle outline so dots stay legible.
+::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  background-color: transparent !important;
 }
 
 ::ng-deep .advanced-pie-legend .legend-items-container .legend-items .legend-item .item-value {
@@ -3125,9 +3139,29 @@ $sev-info:     #2780E3;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
   border-bottom: 1px solid $border-color;
+  flex-wrap: wrap;
+}
+
+.stats-db-header-text {
+  min-width: 0;
+}
+
+// Inline status pill row inside the header.
+.stats-db-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+  align-items: center;
+
+  @media (max-width: 720px) {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 4px;
+  }
 }
 
 .stats-db-header-icon {
@@ -3184,6 +3218,11 @@ $sev-info:     #2780E3;
   gap: 3px;
   position: relative;
   overflow: hidden;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition: border-color 0.15s, background-color 0.15s, opacity 0.2s, transform 0.15s;
 
   @media (max-width: 560px) { padding: 10px 12px 9px; }
 
@@ -3201,14 +3240,56 @@ $sev-info:     #2780E3;
   &--medium::before   { background: $sev-medium; }
   &--low::before      { background: $sev-low; }
   &--info::before     { background: $sev-info; }
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(105, 240, 174, 0.55);
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    border-color: rgba(105, 240, 174, 0.55);
+    background: rgba(105, 240, 174, 0.06);
+
+    .stats-kpi-check { opacity: 1; transform: scale(1); }
+    .stats-kpi-label { color: rgba(255, 255, 255, 0.92); }
+  }
+
+  &.is-dim {
+    opacity: 0.45;
+  }
 }
 
 .stats-kpi-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: $text-secondary;
+}
+
+.stats-kpi-check {
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  line-height: 13px !important;
+  color: $accent-green;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.stats-kpi-row-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .stats-kpi-value {
@@ -3219,6 +3300,13 @@ $sev-info:     #2780E3;
   color: #f5f5f5;
 
   @media (max-width: 560px) { font-size: 1.5rem; }
+}
+
+.stats-kpi-pct {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1;
 }
 
 .stats-kpi-mini-bar {
@@ -3272,11 +3360,9 @@ $sev-info:     #2780E3;
   text-transform: uppercase;
   color: $text-secondary;
   margin-bottom: 14px;
-
-  &--mt { margin-top: 22px; }
 }
 
-// Stacked proportional bar
+// Stacked proportional bar — single severity visual summary at top of card.
 .stats-stacked-bar {
   display: flex;
   height: 8px;
@@ -3284,47 +3370,24 @@ $sev-info:     #2780E3;
   overflow: hidden;
   gap: 2px;
   margin-bottom: 20px;
+
+  &--top {
+    height: 10px;
+    border-radius: 5px;
+    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 
 .stats-stacked-seg {
   height: 100%;
   min-width: 4px;
   cursor: default;
-  transition: opacity 0.15s;
+  transition: opacity 0.2s;
 
   &:hover { opacity: 0.78; }
 
-  &--critical { background: $sev-critical; }
-  &--high     { background: $sev-high; }
-  &--medium   { background: $sev-medium; }
-  &--low      { background: $sev-low; }
-  &--info     { background: $sev-info; }
-}
-
-// Breakdown rows
-.stats-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.stats-breakdown-row {
-  display: grid;
-  grid-template-columns: 8px 76px 1fr 28px 42px;
-  align-items: center;
-  gap: 8px;
-
-  @media (max-width: 400px) {
-    grid-template-columns: 8px min-content 1fr 24px 36px;
-    gap: 6px;
-  }
-}
-
-.stats-bd-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  &.is-dim { opacity: 0.3; }
 
   &--critical { background: $sev-critical; }
   &--high     { background: $sev-high; }
@@ -3333,55 +3396,7 @@ $sev-info:     #2780E3;
   &--info     { background: $sev-info; }
 }
 
-.stats-bd-name {
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-}
-
-.stats-bd-bar-track {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.stats-bd-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &--critical { background: $sev-critical; }
-  &--high     { background: $sev-high; }
-  &--medium   { background: $sev-medium; }
-  &--low      { background: $sev-low; }
-  &--info     { background: $sev-info; }
-}
-
-.stats-bd-count {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #f5f5f5;
-  text-align: right;
-
-  @media (max-width: 400px) { font-size: 0.75rem; }
-}
-
-.stats-bd-pct {
-  font-size: 0.74rem;
-  color: $text-secondary;
-  text-align: right;
-
-  @media (max-width: 400px) { font-size: 0.68rem; }
-}
-
-// Status pills
-.stats-status-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+// Status pills — live in the dashboard header on the right.
 .stats-status-pill {
   display: inline-flex;
   align-items: center;
@@ -3421,9 +3436,108 @@ $sev-info:     #2780E3;
 
 // Activity heatmap
 .heatmap-wrap {
+  --hm-cell: 11px;
+  --hm-gap: 3px;
+  --hm-pitch: calc(var(--hm-cell) + var(--hm-gap));
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 4px;
+}
+
+.heatmap-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heatmap-range-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.heatmap-range-btn {
+  font: inherit;
+  font-size: 0.7rem;
+  background: transparent;
+  border: none;
+  padding: 3px 10px;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+
+  &:hover { color: #fff; }
+
+  &.is-active {
+    background: rgba(105, 240, 174, 0.18);
+    color: #fff;
+  }
+}
+
+.heatmap-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+
+.heatmap-kpi {
+  display: flex;
+  flex-direction: column;
+  min-width: 60px;
+
+  &__value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  &__label {
+    margin-top: 2px;
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__hint {
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  &--scale {
+    margin-left: auto;
+  }
+
+  &__scale {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    line-height: 1.1;
+  }
+}
+
+.heatmap-empty {
+  padding: 12px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
 }
 
 .heatmap-top {
@@ -3443,6 +3557,7 @@ $sev-info:     #2780E3;
 
   span {
     position: absolute;
+    left: calc(var(--hm-pitch) * var(--col, 0));
     font-size: 0.67rem;
     color: $text-secondary;
     white-space: nowrap;
@@ -3458,15 +3573,15 @@ $sev-info:     #2780E3;
 .heatmap-day-labels {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--hm-gap);
   width: 28px;
   flex-shrink: 0;
 
   span {
-    height: 11px;
+    height: var(--hm-cell);
     font-size: 0.65rem;
     color: $text-secondary;
-    line-height: 11px;
+    line-height: var(--hm-cell);
     text-align: right;
     padding-right: 4px;
   }
@@ -3474,30 +3589,83 @@ $sev-info:     #2780E3;
 
 .heatmap-grid {
   display: flex;
-  gap: 3px;
+  gap: var(--hm-gap);
 }
 
 .heatmap-col {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--hm-gap);
 }
 
 .heatmap-cell {
-  width: 11px;
-  height: 11px;
+  --hm-rgb: 255, 255, 255;
+  --hm-alpha: 0.08;
+  width: var(--hm-cell);
+  height: var(--hm-cell);
+  padding: 0;
+  border: none;
   border-radius: 2px;
-  cursor: default;
-  transition: opacity 0.15s;
+  background: rgba(var(--hm-rgb), var(--hm-alpha));
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
 
-  &.heatmap-out { background: transparent; cursor: default; }
-  &.heatmap-l0  { background: rgba(255,255,255,0.08); }
-  &.heatmap-l1  { background: #0e4429; }
-  &.heatmap-l2  { background: #006d32; }
-  &.heatmap-l3  { background: #26a641; }
-  &.heatmap-l4  { background: #39d353; }
+  // Top severity tints the cell.
+  &.hm-top-c { --hm-rgb: var(--sev-critical-rgb); }
+  &.hm-top-h { --hm-rgb: var(--sev-high-rgb); }
+  &.hm-top-m { --hm-rgb: var(--sev-medium-rgb); }
+  &.hm-top-l { --hm-rgb: var(--sev-low-rgb); }
+  &.hm-top-i { --hm-rgb: var(--sev-info-rgb); }
 
-  &:not(.heatmap-out):hover { opacity: 0.75; }
+  // Volume quartile sets saturation.
+  &.hm-q1 { --hm-alpha: 0.30; }
+  &.hm-q2 { --hm-alpha: 0.55; }
+  &.hm-q3 { --hm-alpha: 0.78; }
+  &.hm-q4 { --hm-alpha: 0.95; }
+
+  // In-range but no findings — barely-there neutral.
+  &.heatmap-empty-cell {
+    --hm-rgb: 255, 255, 255;
+    --hm-alpha: 0.06;
+  }
+
+  // Days inside the visible range but outside the test window get muted.
+  &.heatmap-off-window { opacity: 0.45; }
+
+  // Padding cells around the range (week-rollover).
+  &.heatmap-out {
+    background: transparent;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &.heatmap-picked {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+    transform: scale(1.15);
+    z-index: 2;
+    position: relative;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.78;
+  }
+
+  &:disabled { cursor: default; }
+}
+
+// Density scale step square — reused inside the heatmap-kpi--scale chip.
+.heatmap-scale-step {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  --hm-rgb: 255, 255, 255;
+  background: rgba(var(--hm-rgb), var(--hm-alpha, 0.08));
+
+  &.hm-q1 { --hm-alpha: 0.30; }
+  &.hm-q2 { --hm-alpha: 0.55; }
+  &.hm-q3 { --hm-alpha: 0.78; }
+  &.hm-q4 { --hm-alpha: 0.95; }
 }
 
 // Activity calendar
@@ -3528,6 +3696,98 @@ $sev-info:     #2780E3;
     .mat-calendar-body-cell-content {
       font-size: 0.75rem !important;
     }
+  }
+}
+
+// Selected-day breakdown card.
+.act-day-card {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(39, 128, 227, 0.08);
+  border: 1px solid rgba(39, 128, 227, 0.28);
+  border-radius: 8px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  &__icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--sev-info);
+  }
+
+  &__close {
+    width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+
+    .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__total {
+    margin: 6px 0 8px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
+
+    strong {
+      font-size: 1.1rem;
+      color: #fff;
+      margin-right: 4px;
+    }
+  }
+
+  &__breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+
+    strong {
+      color: #fff;
+    }
+  }
+
+  &__chip-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--chip-color, #888);
+  }
+
+  &__empty {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-style: italic;
   }
 }
 
