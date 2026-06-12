@@ -1161,7 +1161,7 @@
       @if (decryptedReportDataChanged.report_vulns.length !== 0) {
       <div class="stats-dashboard">
 
-        <!-- Header -->
+        <!-- Header — title + glanceable status pill row -->
         <div class="stats-db-header">
           <div class="stats-db-header-icon">
             <mat-icon>analytics</mat-icon>
@@ -1170,73 +1170,64 @@
             <span class="stats-db-header-title">Statistics</span>
             <span class="stats-db-header-sub">{{ decryptedReportDataChanged.report_vulns.length }} total findings</span>
           </div>
+          <div class="stats-db-header-meta" role="list" aria-label="Issue status summary">
+            @for (st of statusStatsTable; track st.status) {
+            <div class="stats-status-pill" role="listitem" [title]="st.status + ': ' + st.value">
+              <span class="stats-status-dot" [style.background]="st.color"></span>
+              <span class="stats-status-label">{{ st.status }}</span>
+              <span class="stats-status-count">{{ st.value }}</span>
+            </div>
+            }
+          </div>
         </div>
 
-        <!-- KPI tiles — one per severity -->
-        <div class="stats-kpi-row">
+        <!-- Single severity visual summary: stacked proportional bar -->
+        <div class="stats-stacked-bar stats-stacked-bar--top" role="img" aria-label="Severity distribution bar">
           @for (sev of severitytable; track sev.name) {
-          <div class="stats-kpi-tile stats-kpi-tile--{{ sev.name | lowercase }}">
-            <span class="stats-kpi-label">{{ sev.name }}</span>
-            <span class="stats-kpi-value">{{ sev.value }}</span>
+          @if (sev.value > 0) {
+          <div class="stats-stacked-seg stats-stacked-seg--{{ sev.name | lowercase }}"
+            [style.flex]="sev.value"
+            [class.is-dim]="hasAnySeverityFilter && !isIssueSeverityActive(sev.name)"
+            [title]="sev.name + ': ' + sev.value">
+          </div>
+          }
+          }
+        </div>
+
+        <!-- Canonical severity legend: KPI tiles (click to filter) -->
+        <div class="stats-kpi-row" role="group" aria-label="Severity legend — click to filter">
+          @for (sev of severitytable; track sev.name) {
+          <button type="button"
+            class="stats-kpi-tile stats-kpi-tile--{{ sev.name | lowercase }}"
+            [class.is-active]="isIssueSeverityActive(sev.name)"
+            [class.is-dim]="hasAnySeverityFilter && !isIssueSeverityActive(sev.name)"
+            [attr.aria-pressed]="isIssueSeverityActive(sev.name)"
+            (click)="toggleIssueSeverityToken(sev.name)"
+            [title]="'Toggle severity:' + sev.name + ' filter'">
+            <span class="stats-kpi-label">
+              {{ sev.name }}
+              <mat-icon class="stats-kpi-check">check_circle</mat-icon>
+            </span>
+            <span class="stats-kpi-row-line">
+              <span class="stats-kpi-value">{{ sev.value }}</span>
+              <span class="stats-kpi-pct">{{ decryptedReportDataChanged.report_vulns.length > 0 ?
+                ((sev.value / decryptedReportDataChanged.report_vulns.length) * 100 | number:'1.0-0') : '0' }}%</span>
+            </span>
             <span class="stats-kpi-mini-bar">
               <span class="stats-kpi-mini-bar-fill"
                 [style.width.%]="(sev.value / decryptedReportDataChanged.report_vulns.length) * 100">
               </span>
             </span>
-          </div>
+          </button>
           }
         </div>
 
-        <!-- Body: breakdown chart + activity calendar -->
+        <!-- Body: heatmap (left) + activity calendar (right) -->
         <div class="stats-body-grid">
 
-          <!-- Left: severity breakdown + status pills -->
+          <!-- Left: activity heatmap -->
           <div class="stats-panel">
-            <div class="stats-panel-title">Severity distribution</div>
-
-            <!-- Stacked proportional bar -->
-            <div class="stats-stacked-bar">
-              @for (sev of severitytable; track sev.name) {
-              @if (sev.value > 0) {
-              <div class="stats-stacked-seg stats-seg--{{ sev.name | lowercase }}" [style.flex]="sev.value"
-                [title]="sev.name + ': ' + sev.value">
-              </div>
-              }
-              }
-            </div>
-
-            <!-- Horizontal bar rows -->
-            <div class="stats-breakdown">
-              @for (sev of severitytable; track sev.name) {
-              <div class="stats-breakdown-row">
-                <span class="stats-bd-dot stats-bd-dot--{{ sev.name | lowercase }}"></span>
-                <span class="stats-bd-name">{{ sev.name }}</span>
-                <div class="stats-bd-bar-track">
-                  <div class="stats-bd-bar-fill stats-bd-bar-fill--{{ sev.name | lowercase }}"
-                    [style.width.%]="(sev.value / decryptedReportDataChanged.report_vulns.length) * 100">
-                  </div>
-                </div>
-                <span class="stats-bd-count">{{ sev.value }}</span>
-                <span class="stats-bd-pct">{{ ((sev.value / decryptedReportDataChanged.report_vulns.length) * 100) |
-                  number:'1.0-0' }}%</span>
-              </div>
-              }
-            </div>
-
-            <!-- Issue status pills -->
-            <div class="stats-panel-title stats-panel-title--mt">Issue status</div>
-            <div class="stats-status-row">
-              @for (st of statusStatsTable; track st.status) {
-              <div class="stats-status-pill">
-                <span class="stats-status-dot" [style.background]="st.color"></span>
-                <span class="stats-status-label">{{ st.status }}</span>
-                <span class="stats-status-count">{{ st.value }}</span>
-              </div>
-              }
-            </div>
-
-            <!-- Activity heatmap -->
-            <div class="stats-panel-title stats-panel-title--mt heatmap-section-title">
+            <div class="stats-panel-title heatmap-section-title">
               <span>Activity heatmap</span>
               <span class="heatmap-range-toggle" role="group" aria-label="Heatmap range">
                 @for (opt of heatmapRangeOptions; track opt.mode) {
@@ -1272,6 +1263,16 @@
                 <span class="heatmap-kpi__label">avg / day</span>
               </div>
               }
+              <div class="heatmap-kpi heatmap-kpi--scale" role="listitem"
+                [title]="(heatmapRangeMode !== 'window' && heatmapWindowLabel) ? ('Less ← density → More · Test window: ' + heatmapWindowLabel) : 'Less ← density → More'">
+                <span class="heatmap-kpi__scale" aria-hidden="true">
+                  <span class="heatmap-scale-step hm-q1"></span>
+                  <span class="heatmap-scale-step hm-q2"></span>
+                  <span class="heatmap-scale-step hm-q3"></span>
+                  <span class="heatmap-scale-step hm-q4"></span>
+                </span>
+                <span class="heatmap-kpi__label">density</span>
+              </div>
             </div>
 
             <div class="heatmap-wrap">
@@ -1325,18 +1326,6 @@
                   }
                 </div>
               </div>
-
-              <div class="heatmap-scale">
-                <span class="heatmap-scale-label">Less</span>
-                <span class="heatmap-scale-step hm-q1"></span>
-                <span class="heatmap-scale-step hm-q2"></span>
-                <span class="heatmap-scale-step hm-q3"></span>
-                <span class="heatmap-scale-step hm-q4"></span>
-                <span class="heatmap-scale-label">More</span>
-                @if (heatmapRangeMode !== 'window' && heatmapWindowLabel) {
-                <span class="heatmap-scale-hint">Test window: {{ heatmapWindowLabel }}</span>
-                }
-              </div>
             </div>
           </div>
 
@@ -1347,18 +1336,6 @@
               <mat-calendar [dateClass]="dateClass()" [selected]="selectedRangeValue" [startAt]="startDate"
                 (selectedChange)="onCalendarDayClick($event)">
               </mat-calendar>
-
-              <div class="act-legend" role="list" aria-label="Severity legend">
-                @for (sev of calendarSeverityOrder; track sev.key) {
-                <button type="button" class="act-legend-item" role="listitem"
-                  [class.is-active]="isIssueSeverityActive(sev.label)"
-                  (click)="toggleIssueSeverityToken(sev.label)"
-                  [title]="'Toggle ' + sev.label + ' filter'">
-                  <span class="act-legend-dot" [style.background]="'var(' + sev.cssVar + ')'"></span>
-                  <span class="act-legend-label">{{ sev.label }}</span>
-                </button>
-                }
-              </div>
 
               @if (selectedActivityDay) {
               <div class="act-day-card" role="status">

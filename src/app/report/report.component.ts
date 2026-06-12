@@ -268,6 +268,10 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.issueFilterService.hasFieldToken(this.issueFilterQuery, 'severity', severity);
   }
 
+  get hasAnySeverityFilter(): boolean {
+    return this.issueFilterSeverities.some(sev => this.isIssueSeverityActive(sev));
+  }
+
   clearIssueFilter() {
     this.issueFilterQuery = '';
     this.applyIssueFilter();
@@ -2551,6 +2555,7 @@ Sample code here\n\
     const dialogRef = this.dialog.open(DialogEditComponent, {
       width: '420px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       panelClass: 'edit-dialog-panel',
       data: [{ remo }, { item }],
     });

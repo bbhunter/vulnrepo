@@ -3139,9 +3139,29 @@ $sev-info:     #2780E3;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
   border-bottom: 1px solid $border-color;
+  flex-wrap: wrap;
+}
+
+.stats-db-header-text {
+  min-width: 0;
+}
+
+// Inline status pill row inside the header.
+.stats-db-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+  align-items: center;
+
+  @media (max-width: 720px) {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 4px;
+  }
 }
 
 .stats-db-header-icon {
@@ -3198,6 +3218,11 @@ $sev-info:     #2780E3;
   gap: 3px;
   position: relative;
   overflow: hidden;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition: border-color 0.15s, background-color 0.15s, opacity 0.2s, transform 0.15s;
 
   @media (max-width: 560px) { padding: 10px 12px 9px; }
 
@@ -3215,14 +3240,56 @@ $sev-info:     #2780E3;
   &--medium::before   { background: $sev-medium; }
   &--low::before      { background: $sev-low; }
   &--info::before     { background: $sev-info; }
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(105, 240, 174, 0.55);
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    border-color: rgba(105, 240, 174, 0.55);
+    background: rgba(105, 240, 174, 0.06);
+
+    .stats-kpi-check { opacity: 1; transform: scale(1); }
+    .stats-kpi-label { color: rgba(255, 255, 255, 0.92); }
+  }
+
+  &.is-dim {
+    opacity: 0.45;
+  }
 }
 
 .stats-kpi-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: $text-secondary;
+}
+
+.stats-kpi-check {
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  line-height: 13px !important;
+  color: $accent-green;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.stats-kpi-row-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .stats-kpi-value {
@@ -3233,6 +3300,13 @@ $sev-info:     #2780E3;
   color: #f5f5f5;
 
   @media (max-width: 560px) { font-size: 1.5rem; }
+}
+
+.stats-kpi-pct {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1;
 }
 
 .stats-kpi-mini-bar {
@@ -3286,11 +3360,9 @@ $sev-info:     #2780E3;
   text-transform: uppercase;
   color: $text-secondary;
   margin-bottom: 14px;
-
-  &--mt { margin-top: 22px; }
 }
 
-// Stacked proportional bar
+// Stacked proportional bar — single severity visual summary at top of card.
 .stats-stacked-bar {
   display: flex;
   height: 8px;
@@ -3298,47 +3370,24 @@ $sev-info:     #2780E3;
   overflow: hidden;
   gap: 2px;
   margin-bottom: 20px;
+
+  &--top {
+    height: 10px;
+    border-radius: 5px;
+    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 
 .stats-stacked-seg {
   height: 100%;
   min-width: 4px;
   cursor: default;
-  transition: opacity 0.15s;
+  transition: opacity 0.2s;
 
   &:hover { opacity: 0.78; }
 
-  &--critical { background: $sev-critical; }
-  &--high     { background: $sev-high; }
-  &--medium   { background: $sev-medium; }
-  &--low      { background: $sev-low; }
-  &--info     { background: $sev-info; }
-}
-
-// Breakdown rows
-.stats-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.stats-breakdown-row {
-  display: grid;
-  grid-template-columns: 8px 76px 1fr 28px 42px;
-  align-items: center;
-  gap: 8px;
-
-  @media (max-width: 400px) {
-    grid-template-columns: 8px min-content 1fr 24px 36px;
-    gap: 6px;
-  }
-}
-
-.stats-bd-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  &.is-dim { opacity: 0.3; }
 
   &--critical { background: $sev-critical; }
   &--high     { background: $sev-high; }
@@ -3347,55 +3396,7 @@ $sev-info:     #2780E3;
   &--info     { background: $sev-info; }
 }
 
-.stats-bd-name {
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-}
-
-.stats-bd-bar-track {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.stats-bd-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &--critical { background: $sev-critical; }
-  &--high     { background: $sev-high; }
-  &--medium   { background: $sev-medium; }
-  &--low      { background: $sev-low; }
-  &--info     { background: $sev-info; }
-}
-
-.stats-bd-count {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #f5f5f5;
-  text-align: right;
-
-  @media (max-width: 400px) { font-size: 0.75rem; }
-}
-
-.stats-bd-pct {
-  font-size: 0.74rem;
-  color: $text-secondary;
-  text-align: right;
-
-  @media (max-width: 400px) { font-size: 0.68rem; }
-}
-
-// Status pills
-.stats-status-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+// Status pills — live in the dashboard header on the right.
 .stats-status-pill {
   display: inline-flex;
   align-items: center;
@@ -3513,6 +3514,17 @@ $sev-info:     #2780E3;
     text-transform: none;
     letter-spacing: 0;
     color: rgba(255, 255, 255, 0.45);
+  }
+
+  &--scale {
+    margin-left: auto;
+  }
+
+  &__scale {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    line-height: 1.1;
   }
 }
 
@@ -3642,24 +3654,10 @@ $sev-info:     #2780E3;
   &:disabled { cursor: default; }
 }
 
-.heatmap-scale {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.06);
-}
-
-.heatmap-scale-label {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 0 4px;
-}
-
+// Density scale step square — reused inside the heatmap-kpi--scale chip.
 .heatmap-scale-step {
-  width: var(--hm-cell);
-  height: var(--hm-cell);
+  width: 10px;
+  height: 10px;
   border-radius: 2px;
   --hm-rgb: 255, 255, 255;
   background: rgba(var(--hm-rgb), var(--hm-alpha, 0.08));
@@ -3668,12 +3666,6 @@ $sev-info:     #2780E3;
   &.hm-q2 { --hm-alpha: 0.55; }
   &.hm-q3 { --hm-alpha: 0.78; }
   &.hm-q4 { --hm-alpha: 0.95; }
-}
-
-.heatmap-scale-hint {
-  margin-left: auto;
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.5);
 }
 
 // Activity calendar
@@ -3705,50 +3697,6 @@ $sev-info:     #2780E3;
       font-size: 0.75rem !important;
     }
   }
-}
-
-// Severity legend — also acts as severity quick-filter chips.
-.act-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
-}
-
-.act-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
-  font: inherit;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.78);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.95);
-  }
-
-  &.is-active {
-    background: rgba(105, 240, 174, 0.12);
-    border-color: rgba(105, 240, 174, 0.4);
-    color: #fff;
-  }
-}
-
-.act-legend-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 // Selected-day breakdown card.
