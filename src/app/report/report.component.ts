@@ -164,8 +164,17 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
     { status: 'Fixed', value: 0, color: '#69f0ae' },
     { status: "Won't Fix", value: 0, color: '#616161' },
   ];
-  heatmapWeeks: { date: string, count: number, level: number }[][] = [];
+  heatmapWeeks: { date: string, total: number, top: 'c'|'h'|'m'|'l'|'i'|null, q: 0|1|2|3|4, inRange: boolean, inWindow: boolean }[][] = [];
   heatmapMonthLabels: { label: string, col: number }[] = [];
+  heatmapRangeMode: 'window' | '12w' | 'all' = 'window';
+  readonly heatmapRangeOptions: { mode: 'window' | '12w' | 'all', label: string }[] = [
+    { mode: 'window', label: 'Test window' },
+    { mode: '12w',    label: '12 weeks' },
+    { mode: 'all',    label: 'All-time' },
+  ];
+  heatmapStats: { total: number, activeDays: number, peakLabel: string, peakCount: number, longestStreak: number, avgPerActive: number } = {
+    total: 0, activeDays: 0, peakLabel: '', peakCount: 0, longestStreak: 0, avgPerActive: 0,
+  };
 
   // Per-day activity cache (key: YYYY-MM-DD) used by mat-calendar dateClass and the selected-day card.
   dayActivityMap: Map<string, { c: number, h: number, m: number, l: number, i: number, total: number }> = new Map();
@@ -1578,68 +1587,170 @@ Sample code here\n\
 
   }
 
-  buildHeatmap() {
-    const meta = this.decryptedReportDataChanged.report_metadata;
-    const vulns = this.decryptedReportDataChanged.report_vulns;
+  setHeatmapRange(mode: 'window' | '12w' | 'all') {
+    if (this.heatmapRangeMode === mode) return;
+    this.heatmapRangeMode = mode;
+    this.buildHeatmap();
+  }
 
+  onHeatmapCellClick(cell: { date: string, inRange: boolean }) {
+    if (!cell?.inRange) return;
+    this.onCalendarDayClick(new Date(cell.date));
+  }
+
+  isHeatmapCellPicked(cell: { date: string }): boolean {
+    return this.selectedActivityDay?.key === cell.date;
+  }
+
+  heatmapCellTitle(cell: { date: string, total: number, inRange: boolean }): string {
+    if (!cell.inRange) return '';
+    if (cell.total === 0) return `No findings on ${cell.date}`;
+    const e = this.dayActivityMap.get(cell.date);
+    const parts: string[] = [];
+    if (e) {
+      for (const sev of this.calendarSeverityOrder) {
+        const v = e[sev.key];
+        if (v > 0) parts.push(`${v} ${sev.label}`);
+      }
+    }
+    const breakdown = parts.length ? ` (${parts.join(', ')})` : '';
+    return `${cell.date} — ${cell.total} finding${cell.total !== 1 ? 's' : ''}${breakdown}`;
+  }
+
+  get heatmapWindowLabel(): string {
+    const meta = this.decryptedReportDataChanged?.report_metadata;
+    if (!meta?.starttest || !meta?.endtest) return '';
+    const s = new Date(meta.starttest);
+    const e = new Date(meta.endtest);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return '';
+    return `${this.formatShortDate(this.dateKey(s))} – ${this.formatShortDate(this.dateKey(e))}`;
+  }
+
+  private formatShortDate(key: string): string {
+    const d = new Date(key);
+    if (isNaN(d.getTime())) return key;
+    try {
+      return d.toLocaleDateString(this.setLocal, { month: 'short', day: 'numeric' });
+    } catch {
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+  }
+
+  private getHeatmapRange(): { startNorm: Date, endNorm: Date, winStart: Date | null, winEnd: Date | null } {
+    const meta = this.decryptedReportDataChanged?.report_metadata ?? {};
     const today = new Date();
     const todayNorm = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    let endNorm: Date;
+    const winStart = meta.starttest ? this.normDate(new Date(meta.starttest)) : null;
+    const winEnd   = meta.endtest   ? this.normDate(new Date(meta.endtest))   : null;
+
     let startNorm: Date;
+    let endNorm: Date;
 
-    if (meta.endtest) {
-      const d = new Date(meta.endtest);
-      endNorm = isNaN(d.getTime()) ? todayNorm : new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    } else {
-      endNorm = todayNorm;
-    }
-
-    if (meta.starttest) {
-      const d = new Date(meta.starttest);
-      startNorm = isNaN(d.getTime()) ? new Date(endNorm.getTime() - 29 * 86400000) : new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    } else {
-      startNorm = new Date(endNorm.getTime() - 29 * 86400000);
-    }
-
-    // Count issues per day
-    const countMap: { [key: string]: number } = {};
-    vulns.forEach(v => {
-      if (v.date) {
-        const d = new Date(v.date);
-        if (!isNaN(d.getTime())) {
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-          countMap[key] = (countMap[key] || 0) + 1;
-        }
+    if (this.heatmapRangeMode === '12w') {
+      endNorm = winEnd && winEnd > todayNorm ? winEnd : todayNorm;
+      startNorm = new Date(endNorm.getFullYear(), endNorm.getMonth(), endNorm.getDate() - (12 * 7 - 1));
+    } else if (this.heatmapRangeMode === 'all') {
+      const stamps: number[] = [];
+      for (const k of this.dayActivityMap.keys()) {
+        const d = new Date(k);
+        if (!isNaN(d.getTime())) stamps.push(d.getTime());
       }
-    });
+      if (winStart) stamps.push(winStart.getTime());
+      if (winEnd)   stamps.push(winEnd.getTime());
+      stamps.push(todayNorm.getTime());
+      const minS = Math.min(...stamps);
+      const maxS = Math.max(...stamps);
+      startNorm = new Date(minS);
+      endNorm   = new Date(maxS);
+    } else {
+      endNorm   = winEnd ?? todayNorm;
+      startNorm = winStart ?? new Date(endNorm.getFullYear(), endNorm.getMonth(), endNorm.getDate() - 29);
+    }
 
-    const rangeValues = Object.entries(countMap)
-      .filter(([k]) => { const d = new Date(k); return d >= startNorm && d <= endNorm; })
-      .map(([, v]) => v);
-    const rangeMax = rangeValues.length ? Math.max(...rangeValues) : 1;
+    return { startNorm, endNorm, winStart, winEnd };
+  }
 
-    // Build week columns starting from the Sunday of the week containing startNorm
+  private normDate(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  buildHeatmap() {
+    if (!this.dayActivityMap || this.dayActivityMap.size === 0 && !this.decryptedReportDataChanged?.report_metadata) {
+      this.heatmapWeeks = [];
+      this.heatmapMonthLabels = [];
+      this.heatmapStats = { total: 0, activeDays: 0, peakLabel: '', peakCount: 0, longestStreak: 0, avgPerActive: 0 };
+      return;
+    }
+
+    const { startNorm, endNorm, winStart, winEnd } = this.getHeatmapRange();
+    const sevOrder: ('c'|'h'|'m'|'l'|'i')[] = ['c', 'h', 'm', 'l', 'i'];
+
+    // Compute saturation reference: max daily total inside the visible range.
+    let rangeMax = 0;
+    for (const [key, entry] of this.dayActivityMap.entries()) {
+      const d = new Date(key);
+      if (d >= startNorm && d <= endNorm) rangeMax = Math.max(rangeMax, entry.total);
+    }
+    if (rangeMax === 0) rangeMax = 1;
+
+    // Stat accumulators
+    let total = 0;
+    let activeDays = 0;
+    let peakKey = '';
+    let peakCount = 0;
+    let currentStreak = 0;
+    let longestStreak = 0;
+
+    // Build week columns starting from the Sunday of the week containing startNorm.
     const gridStart = new Date(startNorm);
     gridStart.setDate(gridStart.getDate() - gridStart.getDay());
 
-    const weeks: { date: string, count: number, level: number }[][] = [];
+    const weeks: typeof this.heatmapWeeks = [];
     const monthLabels: { label: string, col: number }[] = [];
     let lastMonth = -1;
     const cur = new Date(gridStart);
 
     while (cur <= endNorm) {
-      const week: { date: string, count: number, level: number }[] = [];
+      const week: typeof this.heatmapWeeks[0] = [];
       for (let d = 0; d < 7; d++) {
         const inRange = cur >= startNorm && cur <= endNorm;
-        const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
-        const count = inRange ? (countMap[key] || 0) : 0;
-        const level = !inRange ? -1 : count === 0 ? 0 : Math.ceil((count / rangeMax) * 4);
-        week.push({ date: key, count, level });
+        const key = this.dateKey(cur);
+        const entry = inRange ? this.dayActivityMap.get(key) : undefined;
+        const count = entry?.total ?? 0;
+        const inWindow = !!winStart && !!winEnd && cur >= winStart && cur <= winEnd;
+
+        let top: 'c'|'h'|'m'|'l'|'i' | null = null;
+        if (entry) {
+          for (const s of sevOrder) {
+            if (entry[s] > 0) { top = s; break; }
+          }
+        }
+
+        let q: 0|1|2|3|4 = 0;
+        if (count > 0) {
+          const ratio = count / rangeMax;
+          q = ratio >= 0.75 ? 4 : ratio >= 0.5 ? 3 : ratio >= 0.25 ? 2 : 1;
+        }
+
+        week.push({ date: key, total: count, top, q, inRange, inWindow });
+
+        if (inRange) {
+          total += count;
+          if (count > 0) {
+            activeDays++;
+            currentStreak++;
+            if (currentStreak > longestStreak) longestStreak = currentStreak;
+            if (count > peakCount) { peakCount = count; peakKey = key; }
+          } else {
+            currentStreak = 0;
+          }
+        }
+
         cur.setDate(cur.getDate() + 1);
       }
 
-      const firstInRange = week.find(d => d.level !== -1);
+      const firstInRange = week.find(d => d.inRange);
       if (firstInRange) {
         const m = new Date(firstInRange.date).getMonth();
         if (m !== lastMonth) {
@@ -1653,6 +1764,14 @@ Sample code here\n\
 
     this.heatmapWeeks = weeks;
     this.heatmapMonthLabels = monthLabels;
+    this.heatmapStats = {
+      total,
+      activeDays,
+      peakLabel: peakKey ? this.formatShortDate(peakKey) : '',
+      peakCount,
+      longestStreak,
+      avgPerActive: activeDays > 0 ? Math.round((total / activeDays) * 10) / 10 : 0,
+    };
   }
 
   getData(event?: PageEvent) {

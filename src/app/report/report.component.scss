@@ -3435,9 +3435,97 @@ $sev-info:     #2780E3;
 
 // Activity heatmap
 .heatmap-wrap {
+  --hm-cell: 11px;
+  --hm-gap: 3px;
+  --hm-pitch: calc(var(--hm-cell) + var(--hm-gap));
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 4px;
+}
+
+.heatmap-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heatmap-range-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.heatmap-range-btn {
+  font: inherit;
+  font-size: 0.7rem;
+  background: transparent;
+  border: none;
+  padding: 3px 10px;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+
+  &:hover { color: #fff; }
+
+  &.is-active {
+    background: rgba(105, 240, 174, 0.18);
+    color: #fff;
+  }
+}
+
+.heatmap-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+
+.heatmap-kpi {
+  display: flex;
+  flex-direction: column;
+  min-width: 60px;
+
+  &__value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  &__label {
+    margin-top: 2px;
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__hint {
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(255, 255, 255, 0.45);
+  }
+}
+
+.heatmap-empty {
+  padding: 12px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
 }
 
 .heatmap-top {
@@ -3457,6 +3545,7 @@ $sev-info:     #2780E3;
 
   span {
     position: absolute;
+    left: calc(var(--hm-pitch) * var(--col, 0));
     font-size: 0.67rem;
     color: $text-secondary;
     white-space: nowrap;
@@ -3472,15 +3561,15 @@ $sev-info:     #2780E3;
 .heatmap-day-labels {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--hm-gap);
   width: 28px;
   flex-shrink: 0;
 
   span {
-    height: 11px;
+    height: var(--hm-cell);
     font-size: 0.65rem;
     color: $text-secondary;
-    line-height: 11px;
+    line-height: var(--hm-cell);
     text-align: right;
     padding-right: 4px;
   }
@@ -3488,30 +3577,103 @@ $sev-info:     #2780E3;
 
 .heatmap-grid {
   display: flex;
-  gap: 3px;
+  gap: var(--hm-gap);
 }
 
 .heatmap-col {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--hm-gap);
 }
 
 .heatmap-cell {
-  width: 11px;
-  height: 11px;
+  --hm-rgb: 255, 255, 255;
+  --hm-alpha: 0.08;
+  width: var(--hm-cell);
+  height: var(--hm-cell);
+  padding: 0;
+  border: none;
   border-radius: 2px;
-  cursor: default;
-  transition: opacity 0.15s;
+  background: rgba(var(--hm-rgb), var(--hm-alpha));
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
 
-  &.heatmap-out { background: transparent; cursor: default; }
-  &.heatmap-l0  { background: rgba(255,255,255,0.08); }
-  &.heatmap-l1  { background: #0e4429; }
-  &.heatmap-l2  { background: #006d32; }
-  &.heatmap-l3  { background: #26a641; }
-  &.heatmap-l4  { background: #39d353; }
+  // Top severity tints the cell.
+  &.hm-top-c { --hm-rgb: var(--sev-critical-rgb); }
+  &.hm-top-h { --hm-rgb: var(--sev-high-rgb); }
+  &.hm-top-m { --hm-rgb: var(--sev-medium-rgb); }
+  &.hm-top-l { --hm-rgb: var(--sev-low-rgb); }
+  &.hm-top-i { --hm-rgb: var(--sev-info-rgb); }
 
-  &:not(.heatmap-out):hover { opacity: 0.75; }
+  // Volume quartile sets saturation.
+  &.hm-q1 { --hm-alpha: 0.30; }
+  &.hm-q2 { --hm-alpha: 0.55; }
+  &.hm-q3 { --hm-alpha: 0.78; }
+  &.hm-q4 { --hm-alpha: 0.95; }
+
+  // In-range but no findings — barely-there neutral.
+  &.heatmap-empty-cell {
+    --hm-rgb: 255, 255, 255;
+    --hm-alpha: 0.06;
+  }
+
+  // Days inside the visible range but outside the test window get muted.
+  &.heatmap-off-window { opacity: 0.45; }
+
+  // Padding cells around the range (week-rollover).
+  &.heatmap-out {
+    background: transparent;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &.heatmap-picked {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+    transform: scale(1.15);
+    z-index: 2;
+    position: relative;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.78;
+  }
+
+  &:disabled { cursor: default; }
+}
+
+.heatmap-scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.heatmap-scale-label {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0 4px;
+}
+
+.heatmap-scale-step {
+  width: var(--hm-cell);
+  height: var(--hm-cell);
+  border-radius: 2px;
+  --hm-rgb: 255, 255, 255;
+  background: rgba(var(--hm-rgb), var(--hm-alpha, 0.08));
+
+  &.hm-q1 { --hm-alpha: 0.30; }
+  &.hm-q2 { --hm-alpha: 0.55; }
+  &.hm-q3 { --hm-alpha: 0.78; }
+  &.hm-q4 { --hm-alpha: 0.95; }
+}
+
+.heatmap-scale-hint {
+  margin-left: auto;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 // Activity calendar

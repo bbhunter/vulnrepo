@@ -1236,13 +1236,55 @@
             </div>
 
             <!-- Activity heatmap -->
-            <div class="stats-panel-title stats-panel-title--mt">Activity heatmap</div>
+            <div class="stats-panel-title stats-panel-title--mt heatmap-section-title">
+              <span>Activity heatmap</span>
+              <span class="heatmap-range-toggle" role="group" aria-label="Heatmap range">
+                @for (opt of heatmapRangeOptions; track opt.mode) {
+                <button type="button" class="heatmap-range-btn"
+                  [class.is-active]="heatmapRangeMode === opt.mode"
+                  (click)="setHeatmapRange(opt.mode)">{{ opt.label }}</button>
+                }
+              </span>
+            </div>
+
+            <div class="heatmap-kpis" role="list" aria-label="Activity summary">
+              <div class="heatmap-kpi" role="listitem">
+                <span class="heatmap-kpi__value">{{ heatmapStats.total }}</span>
+                <span class="heatmap-kpi__label">findings</span>
+              </div>
+              <div class="heatmap-kpi" role="listitem">
+                <span class="heatmap-kpi__value">{{ heatmapStats.activeDays }}</span>
+                <span class="heatmap-kpi__label">active days</span>
+              </div>
+              @if (heatmapStats.peakCount > 0) {
+              <div class="heatmap-kpi" role="listitem">
+                <span class="heatmap-kpi__value">{{ heatmapStats.peakCount }}</span>
+                <span class="heatmap-kpi__label">peak <span class="heatmap-kpi__hint">({{ heatmapStats.peakLabel }})</span></span>
+              </div>
+              }
+              <div class="heatmap-kpi" role="listitem">
+                <span class="heatmap-kpi__value">{{ heatmapStats.longestStreak }} d</span>
+                <span class="heatmap-kpi__label">streak</span>
+              </div>
+              @if (heatmapStats.activeDays > 0) {
+              <div class="heatmap-kpi" role="listitem">
+                <span class="heatmap-kpi__value">{{ heatmapStats.avgPerActive }}</span>
+                <span class="heatmap-kpi__label">avg / day</span>
+              </div>
+              }
+            </div>
+
             <div class="heatmap-wrap">
+              @if (heatmapStats.total === 0) {
+              <div class="heatmap-empty">
+                No dated findings in this range. Add dates to issues or switch to All-time.
+              </div>
+              }
               <div class="heatmap-top">
                 <div class="heatmap-day-gutter"></div>
                 <div class="heatmap-months-row">
                   @for (ml of heatmapMonthLabels; track ml.col) {
-                  <span [style.left.px]="ml.col * 14">{{ ml.label }}</span>
+                  <span [style.--col]="ml.col">{{ ml.label }}</span>
                   }
                 </div>
               </div>
@@ -1260,16 +1302,40 @@
                   @for (week of heatmapWeeks; track $index) {
                   <div class="heatmap-col">
                     @for (day of week; track day.date) {
-                    <div class="heatmap-cell" [class.heatmap-out]="day.level === -1"
-                      [class.heatmap-l0]="day.level === 0" [class.heatmap-l1]="day.level === 1"
-                      [class.heatmap-l2]="day.level === 2" [class.heatmap-l3]="day.level === 3"
-                      [class.heatmap-l4]="day.level === 4"
-                      [title]="day.level >= 0 ? (day.count + ' issue' + (day.count !== 1 ? 's' : '') + ' on ' + day.date) : ''">
-                    </div>
+                    <button type="button" class="heatmap-cell"
+                      [disabled]="!day.inRange"
+                      [class.heatmap-out]="!day.inRange"
+                      [class.heatmap-empty-cell]="day.inRange && day.total === 0"
+                      [class.heatmap-off-window]="day.inRange && !day.inWindow && (heatmapRangeMode !== 'window')"
+                      [class.heatmap-picked]="isHeatmapCellPicked(day)"
+                      [class.hm-top-c]="day.top === 'c'"
+                      [class.hm-top-h]="day.top === 'h'"
+                      [class.hm-top-m]="day.top === 'm'"
+                      [class.hm-top-l]="day.top === 'l'"
+                      [class.hm-top-i]="day.top === 'i'"
+                      [class.hm-q1]="day.q === 1"
+                      [class.hm-q2]="day.q === 2"
+                      [class.hm-q3]="day.q === 3"
+                      [class.hm-q4]="day.q === 4"
+                      [title]="heatmapCellTitle(day)"
+                      (click)="onHeatmapCellClick(day)">
+                    </button>
                     }
                   </div>
                   }
                 </div>
+              </div>
+
+              <div class="heatmap-scale">
+                <span class="heatmap-scale-label">Less</span>
+                <span class="heatmap-scale-step hm-q1"></span>
+                <span class="heatmap-scale-step hm-q2"></span>
+                <span class="heatmap-scale-step hm-q3"></span>
+                <span class="heatmap-scale-step hm-q4"></span>
+                <span class="heatmap-scale-label">More</span>
+                @if (heatmapRangeMode !== 'window' && heatmapWindowLabel) {
+                <span class="heatmap-scale-hint">Test window: {{ heatmapWindowLabel }}</span>
+                }
               </div>
             </div>
           </div>
