@@ -3175,6 +3175,12 @@ mat-paginator {
 }
 
 .report-empty-state button[mat-fab] {
+  --mdc-extended-fab-container-color: rgba(105, 240, 174, 0.30);
+  --mdc-extended-fab-label-text-color: #fff;
+  --mat-fab-foreground-color: #fff;
+  --mat-fab-state-layer-color: #69f0ae;
+  --mat-fab-ripple-color: rgba(105, 240, 174, 0.30);
+
   background-color: rgba(105, 240, 174, 0.30) !important;
   color: #fff !important;
   outline: 2px solid rgba(105, 240, 174, 0.80);
@@ -3184,6 +3190,7 @@ mat-paginator {
   mat-icon { color: #fff !important; }
 
   &:hover {
+    --mdc-extended-fab-container-color: rgba(105, 240, 174, 0.40);
     background-color: rgba(105, 240, 174, 0.40) !important;
   }
 }
@@ -3764,6 +3771,17 @@ $sev-info:     #2780E3;
     background: transparent !important;
     width: 100% !important;
     min-width: 0 !important;
+  }
+
+  // Rebind datepicker palette tokens that M3 derives from the green primary
+  // (otherwise resolve to ~#015300). ::ng-deep ensures the override lands on
+  // descendants of <mat-calendar> regardless of view encapsulation.
+  ::ng-deep .mat-calendar {
+    --mat-datepicker-calendar-date-focus-state-background-color: rgba(105, 240, 174, 0.18) !important;
+    --mat-datepicker-calendar-date-hover-state-background-color: rgba(105, 240, 174, 0.12) !important;
+    --mat-datepicker-calendar-date-in-range-state-background-color: rgba(105, 240, 174, 0.14) !important;
+    --mat-datepicker-calendar-date-in-overlap-range-state-background-color: rgba(105, 240, 174, 0.22) !important;
+    --mat-datepicker-calendar-date-in-comparison-range-state-background-color: rgba(105, 240, 174, 0.06) !important;
   }
 
   .mat-calendar-header {
