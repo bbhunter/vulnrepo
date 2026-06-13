@@ -945,6 +945,10 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
       this.stripDateTokens(this.issueFilterQuery), 'date', key,
     );
     this.applyIssueFilter();
+    // Force mat-calendar to re-evaluate dateClass on every cell so the
+    // act-picked highlight moves to the newly clicked day. Material does not
+    // rebuild cells just because the dateClass function reference changes.
+    this.calendar?.updateTodaysDate();
     setTimeout(() => {
       const el = document.querySelector('.report-issue-filter-bar');
       el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -955,6 +959,7 @@ export class ReportComponent implements OnInit, OnDestroy, AfterViewInit {
     this.selectedActivityDay = null;
     this.issueFilterQuery = this.stripDateTokens(this.issueFilterQuery);
     this.applyIssueFilter();
+    this.calendar?.updateTodaysDate();
   }
 
   private stripDateTokens(query: string): string {

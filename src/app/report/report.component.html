@@ -1275,7 +1275,7 @@
               </div>
             </div>
 
-            <div class="heatmap-wrap">
+            <div class="heatmap-wrap" [style.--hm-cols]="heatmapWeeks.length || 53">
               @if (heatmapStats.total === 0) {
               <div class="heatmap-empty">
                 No dated findings in this range. Add dates to issues or switch to All-time.

@@ -850,7 +850,14 @@ tr.mat-mdc-footer-row td {
     --dot-m: transparent;
     --dot-l: transparent;
     --dot-i: transparent;
-    position: relative;
+    // Keep Material's absolute layout (top:5% / height:90%) so the button
+    // aligns with the range stripe; absolute is already a containing block
+    // for the ::after dots below.
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
     border-radius: 8px;
     overflow: visible;
   }
@@ -883,11 +890,18 @@ tr.mat-mdc-footer-row td {
   &.act-q3 .mat-calendar-body-cell-content { background-color: rgba(255, 255, 255, 0.11); }
   &.act-q4 .mat-calendar-body-cell-content { background-color: rgba(255, 255, 255, 0.16); }
 
-  // User-picked day filtering the issue table.
+  // User-picked day filtering the issue table — must clearly stand out on top
+  // of the range stripe and the density tints below.
   &.act-picked .mat-calendar-body-cell-content {
-    outline: 2px solid var(--sev-info);
+    background-color: rgba(46, 125, 90, 0.55) !important;
+    color: #fff !important;
+    font-weight: 600;
+    outline: 2px solid rgba(110, 220, 170, 0.95);
     outline-offset: -2px;
-    background-color: rgba(39, 128, 227, 0.18);
+    box-shadow: 0 0 0 1px rgba(46, 125, 90, 0.65);
+    // Sit above .mat-calendar-body-cell::before (range stripe) so the ring is
+    // never clipped.
+    z-index: 2;
   }
 }
 
@@ -895,6 +909,52 @@ tr.mat-mdc-footer-row td {
 ::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
   border-color: rgba(255, 255, 255, 0.55) !important;
   background-color: transparent !important;
+}
+
+// Range selection: mint-green connector aligned with the rounded day buttons.
+// Hue matches #69f0ae (rgb 105,240,174) used elsewhere (legend hover), with
+// low opacities so the range reads as a wash, not a slab.
+// Material's ::before defaults to full cell height, so it visually clipped past
+// the rounded .mat-calendar-body-cell-content. We pin it to the same vertical
+// inset (5%) so the stripe height equals the button diameter and the endpoints
+// flow into the middle without a "tall bar through small circles" effect.
+::ng-deep .mat-calendar-body-cell::before {
+  top: 5% !important;
+  height: 90% !important;
+}
+
+::ng-deep .mat-calendar-body-in-range::before {
+  background: linear-gradient(
+    90deg,
+    rgba(105, 240, 174, 0.14),
+    rgba(105, 240, 174, 0.08)
+  );
+}
+
+::ng-deep .mat-calendar-body-range-start::before,
+::ng-deep .mat-calendar-body-range-end::before {
+  background: rgba(105, 240, 174, 0.22);
+}
+
+::ng-deep .mat-calendar-body-range-start::before {
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
+}
+
+::ng-deep .mat-calendar-body-range-end::before {
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  background-color: rgba(105, 240, 174, 0.28) !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 1px rgba(105, 240, 174, 0.45);
+}
+
+// Comparison / hover-preview range stays quieter than the active selection.
+::ng-deep .mat-calendar-body-in-comparison-range::before {
+  background: rgba(105, 240, 174, 0.06);
 }
 
 ::ng-deep .advanced-pie-legend .legend-items-container .legend-items .legend-item .item-value {
@@ -3436,8 +3496,21 @@ $sev-info:     #2780E3;
 
 // Activity heatmap
 .heatmap-wrap {
-  --hm-cell: 11px;
+  // --hm-cols is set inline from heatmapWeeks.length (template binding).
+  // Derive cell size from the wrap's own inline size so the grid expands to
+  // use available width instead of leaving dead space on the right.
+  //   total usable = 100cqi minus 28px day gutter + 4px gutter→grid margin
+  //   per column   = (usable / cols) - gap
+  // clamp() keeps cells readable at narrow widths and prevents giant cells
+  // when the wrap is unusually wide (e.g. all-time view on a desktop).
+  container-type: inline-size;
+  --hm-cols: 53;
   --hm-gap: 3px;
+  --hm-cell: clamp(
+    10px,
+    calc((100cqi - 32px) / var(--hm-cols) - var(--hm-gap)),
+    22px
+  );
   --hm-pitch: calc(var(--hm-cell) + var(--hm-gap));
   overflow-x: auto;
   overflow-y: hidden;
