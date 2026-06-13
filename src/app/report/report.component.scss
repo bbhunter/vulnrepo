@@ -3734,11 +3734,24 @@ $sev-info:     #2780E3;
     width: 28px !important;
     height: 28px !important;
     line-height: 28px !important;
+    padding: 0 !important;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    ::ng-deep .mat-mdc-button-touch-target {
+      width: 28px;
+      height: 28px;
+    }
 
     .mat-icon {
       font-size: 18px;
       width: 18px;
       height: 18px;
+      line-height: 18px;
+      margin: 0;
     }
   }
 
