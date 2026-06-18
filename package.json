@@ -59,5 +59,11 @@
     "karma-jasmine-html-reporter": "^2.2.0",
     "ts-node": "~10.9.2",
     "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.6": true,
+    "lmdb@3.5.4": true,
+    "msgpackr-extract@3.0.4": true,
+    "esbuild": true
   }
 }
