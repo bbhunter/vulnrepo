@@ -226,6 +226,13 @@ export class KeyVaultService implements OnDestroy {
       return;
     }
 
+    // Nothing unlocked → nothing to lock. Don't arm timers (would fire a
+     // spurious "Auto-lock in 30 seconds" warning on pages like /my-reports).
+    if (this.keys.size === 0 && this.apiVault === null) {
+      this.idleResetAtSubject.next(null);
+      return;
+    }
+
     const idleMs = minutes * 60 * 1000;
     this.idleTimer = setTimeout(this.clearAll, idleMs);
 
@@ -237,14 +244,12 @@ export class KeyVaultService implements OnDestroy {
       }, idleMs - WARNING_BEFORE_LOCK_MS);
     }
 
-    if (this.keys.size > 0 || this.apiVault !== null) {
-      const newAt = Date.now() + idleMs;
-      const prev = this.idleResetAtSubject.value;
-      // Throttle: only re-emit if the reset point shifted by more than 5s
-      // (avoids spamming switchMap on every mousemove event)
-      if (prev === null || newAt - prev > 5000) {
-        this.idleResetAtSubject.next(newAt);
-      }
+    const newAt = Date.now() + idleMs;
+    const prev = this.idleResetAtSubject.value;
+    // Throttle: only re-emit if the reset point shifted by more than 5s
+    // (avoids spamming switchMap on every mousemove event)
+    if (prev === null || newAt - prev > 5000) {
+      this.idleResetAtSubject.next(newAt);
     }
   };
 
